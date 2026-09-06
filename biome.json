@@ -1,9 +1,20 @@
 {
   "$schema": "https://biomejs.dev/schemas/2.4.2/schema.json",
-  "vcs": {
-    "enabled": true,
-    "clientKind": "git",
-    "useIgnoreFile": true
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": "on",
+        "useSortedAttributes": "on",
+        "useSortedInterfaceMembers": "on",
+        "useSortedKeys": "on",
+        "useSortedProperties": "on"
+      }
+    }
+  },
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
+    }
   },
   "files": {
     "ignoreUnknown": true,
@@ -11,29 +22,53 @@
   },
   "formatter": {
     "enabled": true,
+    "formatWithErrors": true,
     "indentStyle": "space",
-    "indentWidth": 2
+    "indentWidth": 2,
+    "lineEnding": "lf",
+    "lineWidth": 80
   },
-  "css": {
-    "parser": {
-      "tailwindDirectives": true
+  "javascript": {
+    "formatter": {
+      "arrowParentheses": "always",
+      "bracketSameLine": false,
+      "bracketSpacing": true,
+      "jsxQuoteStyle": "double",
+      "quoteStyle": "single",
+      "semicolons": "always",
+      "trailingCommas": "all"
     }
   },
   "linter": {
-    "enabled": true,
-    "rules": {
-      "recommended": true
-    },
     "domains": {
       "next": "recommended",
       "react": "recommended"
-    }
-  },
-  "assist": {
-    "actions": {
-      "source": {
-        "organizeImports": "on"
+    },
+    "enabled": true,
+    "rules": {
+      "correctness": {
+        "noUnusedImports": {
+          "fix": "safe",
+          "level": "error"
+        },
+        "noUnusedVariables": "warn"
+      },
+      "nursery": {
+        "useExplicitType": "warn",
+        "useSortedClasses": {
+          "fix": "safe",
+          "level": "error"
+        }
+      },
+      "recommended": true,
+      "style": {
+        "useImportType": "warn"
       }
     }
+  },
+  "vcs": {
+    "clientKind": "git",
+    "enabled": true,
+    "useIgnoreFile": true
   }
 }
