@@ -25,6 +25,90 @@ Iñaki Carcereny · Valentín De Pascale · Joaquín Marcilese
 
 ---
 
+## Cómo levantar el proyecto
+
+### Requisitos previos
+
+- [Node.js](https://nodejs.org/) v22 o superior
+- [pnpm](https://pnpm.io/) v11 o superior
+- [Docker](https://www.docker.com/) y Docker Compose (opcional, para levantar Postgres localmente)
+
+### 1. Clonar el repositorio
+
+```bash
+git clone https://github.com/InakiCarcereny/metodologia-2-proyecto-final
+cd metodologia-2-proyecto-final
+```
+
+### 2. Instalar dependencias
+
+```bash
+pnpm install
+```
+
+Esto también configura automáticamente los git hooks de Husky (`prepare` script).
+
+### 3. Configurar variables de entorno
+
+Copiá el archivo de ejemplo y completá los valores:
+
+```bash
+cp .env.example .env
+```
+
+Variables necesarias:
+
+```env
+DATABASE_URL=postgres://postgres:postgres@localhost:5432/mi_app
+
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+```
+
+### 4. Levantar la base de datos
+
+**Opción A — con Docker (recomendado):**
+
+```bash
+docker compose up -d db
+```
+
+**Opción B — Postgres instalado localmente:**
+
+Asegurate de tener una instancia de Postgres corriendo y que `DATABASE_URL` en tu `.env` apunte correctamente a ella.
+
+### 5. Aplicar las migraciones de la base de datos
+
+```bash
+pnpm drizzle-kit migrate
+```
+
+Si es la primera vez y no tenés migraciones generadas todavía:
+
+```bash
+pnpm drizzle-kit generate
+pnpm drizzle-kit migrate
+```
+
+### 6. Levantar el proyecto en desarrollo
+
+```bash
+pnpm dev
+```
+
+La app va a estar disponible en [http://localhost:3000](http://localhost:3000).
+
+### 7. (Opcional) Levantar todo con Docker
+
+Si preferís correr la app completa (frontend + DB) en contenedores:
+
+```bash
+docker compose up --build
+```
+
+---
+
 ## Flujo y metodología de trabajo
 
 | Rama         | Descripción                             |
@@ -115,7 +199,7 @@ Iñaki Carcereny · Valentín De Pascale · Joaquín Marcilese
 
 ### Notificaciones
 
-- Sileo
+- [Sileo](https://sileo.aaryan.design/)
 
 ### Deploy
 
