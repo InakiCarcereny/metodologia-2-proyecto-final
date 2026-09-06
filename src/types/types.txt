@@ -1,0 +1,1 @@
+tipos globales que son reutilizables
