@@ -1,36 +1,125 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+<div align="center">
 
-## Getting Started
+# DevHub
 
-First, run the development server:
+### Red social exclusiva para desarrolladores
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
+![Next JS](https://img.shields.io/badge/Next-%23000.svg?style=for-the-badge&logo=next.js&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white)
+![Drizzle](https://img.shields.io/badge/Drizzle-%23000000.svg?style=for-the-badge&logo=drizzle&logoColor=C5F74F)
+![Postgres](https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white)
+![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Integrantes - Grupo N-9
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Iñaki Carcereny · Valentín De Pascale · Joaquín Marcilese
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+</div>
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## Descripción
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+**DevHub** es una red social para desarrolladores. Cada usuario cuenta con un perfil integrado con la API de GitHub, donde se muestran sus repositorios y los lenguajes de programación que más utiliza. Además, permite crear publicaciones, incluyendo posts de código con syntax highlighting.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## Flujo y metodología de trabajo
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+| Rama         | Descripción                             |
+| ------------ | --------------------------------------- |
+| `main`       | Versión final de producción             |
+| `dev`        | Integración de todas las features       |
+| `feature/*`  | Nuevas funcionalidades                  |
+| `refactor/*` | Mejoras y reestructuración del código   |
+| `docs/*`     | Cambios en documentación                |
+| `fix/*`      | Corrección de errores                   |
+| `chore/*`    | Tareas de mantenimiento y configuración |
+| `test/*`     | Pruebas unitarias                       |
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## Convención de commits
+
+| Prefijo     | Uso                                                   |
+| ----------- | ----------------------------------------------------- |
+| `feat:`     | Nueva funcionalidad                                   |
+| `fix:`      | Corrección de bug                                     |
+| `docs:`     | Cambios en documentación                              |
+| `style:`    | Cambios de formato o estilo de código                 |
+| `refactor:` | Reorganización de código                              |
+| `chore:`    | Configuración, dependencias o tareas de mantenimiento |
+
+---
+
+## Tecnologías utilizadas
+
+### Framework y lenguaje
+
+- [Next.js](https://nextjs.org/)
+- [React](https://react.dev/)
+- [TypeScript](https://www.typescriptlang.org/)
+
+### Estilos
+
+- [Tailwind CSS](https://tailwindcss.com/)
+- [class-variance-authority](https://cva.style/)
+- [clsx](https://github.com/lukeed/clsx)
+- [tailwind-merge](https://github.com/dcastil/tailwind-merge)
+
+### Base de datos
+
+- [PostgreSQL](https://www.postgresql.org/)
+- [Drizzle ORM](https://orm.drizzle.team/)
+- [pg](https://node-postgres.com/)
+
+### Formularios y validación
+
+- [React Hook Form](https://react-hook-form.com/)
+- [Zod](https://zod.dev/)
+- [@hookform/resolvers](https://github.com/react-hook-form/resolvers)
+
+### Autenticación
+
+- [bcrypt](https://github.com/kelektiv/node.bcrypt.js)
+
+### Almacenamiento de archivos
+
+- [Cloudinary](https://cloudinary.com/)
+
+### Testing
+
+- [Vitest](https://vitest.dev/)
+- [React Testing Library](https://testing-library.com/react)
+- [jsdom](https://github.com/jsdom/jsdom)
+
+### Calidad de código
+
+- [Biome](https://biomejs.dev/)
+- [Husky](https://typicode.github.io/husky/)
+- [lint-staged](https://github.com/lint-staged/lint-staged)
+- [Commitlint](https://commitlint.js.org/)
+
+### Contenedores
+
+- [Docker](https://www.docker.com/)
+
+### Package manager
+
+- [pnpm](https://pnpm.io/)
+
+### Íconos
+
+- [Lucide React](https://lucide.dev/)
+
+### Notificaciones
+
+- Sileo
+
+### Deploy
+
+- [Vercel](https://vercel.com/)
+- [Neon](https://neon.tech/)
+
+---
