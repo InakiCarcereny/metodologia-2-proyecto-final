@@ -1,0 +1,1 @@
+funciones auxiliares que no dependen de hooks de react
