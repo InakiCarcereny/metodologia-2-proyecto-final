@@ -1,0 +1,1 @@
+logica reutilizable que dependa de hooks de react
