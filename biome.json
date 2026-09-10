@@ -42,16 +42,35 @@
   "linter": {
     "domains": {
       "next": "recommended",
-      "react": "recommended"
+      "react": "recommended",
+      "test": "recommended"
     },
     "enabled": true,
     "rules": {
+      "a11y": {
+        "noLabelWithoutControl": "error",
+        "noRedundantAlt": "warn",
+        "useAltText": "error",
+        "useButtonType": "error",
+        "useHeadingContent": "error"
+      },
+      "complexity": {
+        "noUselessFragments": "off"
+      },
       "correctness": {
+        "noConstAssign": "error",
+        "noEmptyPattern": "error",
+        "noInvalidUseBeforeDeclaration": "error",
+        "noNestedComponentDefinitions": "error",
+        "noReactPropAssignments": "error",
+        "noUnusedFunctionParameters": "error",
         "noUnusedImports": {
           "fix": "safe",
           "level": "error"
         },
-        "noUnusedVariables": "warn"
+        "noUnusedVariables": "warn",
+        "useHookAtTopLevel": "error",
+        "useJsxKeyInIterable": "error"
       },
       "nursery": {
         "useExplicitType": "warn",
@@ -60,9 +79,31 @@
           "level": "error"
         }
       },
+      "performance": {
+        "noImgElement": "error"
+      },
       "recommended": true,
       "style": {
+        "useCollapsedElseIf": "warn",
+        "useCollapsedIf": "warn",
+        "useConsistentArrayType": "warn",
         "useImportType": "warn"
+      },
+      "suspicious": {
+        "noArrayIndexKey": "error",
+        "noCommentText": "error",
+        "noConsole": "warn",
+        "noDoubleEquals": "error",
+        "noDuplicateElseIf": "error",
+        "noDuplicateJsxProps": "error",
+        "noDuplicateObjectKeys": "error",
+        "noDuplicateParameters": "error",
+        "noEmptyBlockStatements": "error",
+        "noEmptyInterface": "warn",
+        "noImplicitAnyLet": "error",
+        "noIrregularWhitespace": "warn",
+        "noSelfCompare": "error",
+        "noTsIgnore": "warn"
       }
     }
   },
