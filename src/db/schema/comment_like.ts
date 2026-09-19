@@ -1,13 +1,19 @@
-import { pgTable, serial, timestamp } from 'drizzle-orm/pg-core';
-import { comments } from '../schema/comment';
-import { users } from '../schema/user';
+import { integer, pgTable, primaryKey, timestamp } from 'drizzle-orm/pg-core';
+import { comments } from './comment';
+import { users } from './user';
 
-export const commentLikes = pgTable('comment_likes', {
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  idComment: serial('id_comment').references(() => comments.id, {
-    onDelete: 'cascade',
-  }),
-  idUser: serial('id_user').references(() => users.id, {
-    onDelete: 'cascade',
-  }),
-});
+export const commentLikes = pgTable(
+  'comment_likes',
+  {
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    idComment: integer('id_comment')
+      .notNull()
+      .references(() => comments.id, { onDelete: 'cascade' }),
+    idUser: integer('id_user')
+      .notNull()
+      .references(() => users.id, {
+        onDelete: 'cascade',
+      }),
+  },
+  (table) => [primaryKey({ columns: [table.idComment, table.idUser] })],
+);

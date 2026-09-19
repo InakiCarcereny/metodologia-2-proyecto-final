@@ -1,11 +1,19 @@
-import { pgTable, serial, timestamp } from 'drizzle-orm/pg-core';
-import { userPosts } from './post';
+import { integer, pgTable, primaryKey, timestamp } from 'drizzle-orm/pg-core';
+import { posts } from './post';
 import { users } from './user';
 
-export const postShares = pgTable('post_shares', {
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  idPost: serial('id_post').references(() => userPosts.id, {
-    onDelete: 'cascade',
-  }),
-  idUser: serial('id_user').references(() => users.id, { onDelete: 'cascade' }),
-});
+export const postShares = pgTable(
+  'post_shares',
+  {
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    idPost: integer('id_post')
+      .notNull()
+      .references(() => posts.id, {
+        onDelete: 'cascade',
+      }),
+    idUser: integer('id_user')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+  },
+  (table) => [primaryKey({ columns: [table.idPost, table.idUser] })],
+);
