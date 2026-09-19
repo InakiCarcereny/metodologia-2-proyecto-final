@@ -1,3 +1,4 @@
+export * from './comment';
 export * from './post';
 export * from './post_like';
 export * from './post_share';
