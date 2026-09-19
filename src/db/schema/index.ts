@@ -1,4 +1,5 @@
 export * from './comment';
+export * from './comment_like';
 export * from './follower';
 export * from './post';
 export * from './post_like';
