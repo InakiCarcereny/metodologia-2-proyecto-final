@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/Button';
 
 export function UserCard(): JSX.Element {
   return (
-    <article className="flex h-56 w-56 flex-col justify-between rounded-xl border border-[#dfe1e5] bg-[#ffffff] p-4">
+    <article className="flex h-60 w-56 flex-col justify-between rounded-xl border border-[#dfe1e5] bg-[#ffffff] p-4">
       <div className="flex gap-2">
         <Image
           alt="image"
