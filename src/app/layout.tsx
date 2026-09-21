@@ -1,17 +1,13 @@
 import './globals.css';
 import type { Metadata } from 'next';
-import type { NextFontWithVariable } from 'next/dist/compiled/@next/font';
-import { Geist, Geist_Mono } from 'next/font/google';
+import type { NextFont } from 'next/dist/compiled/@next/font';
+import { IBM_Plex_Mono } from 'next/font/google';
 import type { JSX } from 'react';
 
-const geistSans: NextFontWithVariable = Geist({
+const ibmPlexMono: NextFont = IBM_Plex_Mono({
+  display: 'swap',
   subsets: ['latin'],
-  variable: '--font-geist-sans',
-});
-
-const geistMono: NextFontWithVariable = Geist_Mono({
-  subsets: ['latin'],
-  variable: '--font-geist-mono',
+  weight: '400',
 });
 
 export const metadata: Metadata = {
@@ -23,10 +19,7 @@ export default function RootLayout({
   children,
 }: LayoutProps<'/'>): JSX.Element {
   return (
-    <html
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-      lang="en"
-    >
+    <html className={`${ibmPlexMono.className} h-full antialiased`} lang="en">
       <body className="flex min-h-full flex-col">{children}</body>
     </html>
   );
