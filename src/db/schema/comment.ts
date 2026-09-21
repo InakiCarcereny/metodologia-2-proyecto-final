@@ -10,6 +10,7 @@ import { posts } from './post';
 import { users } from './user';
 
 export const comments = pgTable('comments', {
+  codeLine: text('code_line'),
   content: text('content').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   id: serial('id').primaryKey(),

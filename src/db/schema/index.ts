@@ -1,3 +1,4 @@
+export * from './bookmarks';
 export * from './comment';
 export * from './comment_like';
 export * from './follower';
