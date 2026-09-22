@@ -26,11 +26,9 @@ export const posts = pgTable(
       .defaultNow()
       .notNull(),
     id: serial('id').primaryKey(),
-    idUser: integer('id_user')
-      .notNull()
-      .references(() => users.id, {
-        onDelete: 'cascade',
-      }),
+    idUser: integer('id_user').references(() => users.id, {
+      onDelete: 'set null',
+    }),
     imageUrl: text('image_url'),
     title: text('title').notNull(),
     type: postTypes('type').notNull().default('snippet'),

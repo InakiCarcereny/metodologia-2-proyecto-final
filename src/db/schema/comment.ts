@@ -23,6 +23,6 @@ export const comments = pgTable('comments', {
       onDelete: 'cascade',
     }),
   idUser: integer('id_user').references(() => users.id, {
-    onDelete: 'cascade',
+    onDelete: 'set null',
   }),
 });
