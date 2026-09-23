@@ -17,7 +17,7 @@ export function CardWrapper<T extends ElementType = 'div'>({
   return (
     <Component
       className={cn(
-        'rounded-2xl border border-[#dfe1e5] bg-white p-4',
+        'rounded-lg border border-[#dfe1e5] bg-white p-4',
         className,
       )}
       {...props}

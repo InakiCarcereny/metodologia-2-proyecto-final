@@ -9,7 +9,7 @@ import { UserCard } from '@/components/UserCard';
 
 export function NavigationSideBar(): JSX.Element {
   return (
-    <aside className="sticky top-0 flex flex-col justify-between gap-6 overflow-y-auto py-6">
+    <aside className="sticky top-0 flex flex-col justify-between overflow-y-auto py-6">
       <div className="flex flex-col gap-4">
         <header>
           <Link className="flex items-center gap-2" href="/home">

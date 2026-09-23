@@ -31,7 +31,7 @@ const TAGS: TagList = [
 
 export function TagList(): JSX.Element {
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col gap-1">
       <span className="pl-2.5 font-medium text-[#878992] text-[12px]">
         TUS TAGS
       </span>

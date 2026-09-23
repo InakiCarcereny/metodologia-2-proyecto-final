@@ -18,7 +18,7 @@ export function NavItem({ label, path }: NavItemProps): JSX.Element {
     <li className="w-full">
       <Link
         className={cn(
-          'block w-full rounded-xl p-2.5 text-[14px] hover:bg-white',
+          'block w-full rounded-lg p-2 text-[13px] hover:bg-white',
           isActive
             ? 'border border-[#dfe1e5] bg-white font-bold text-black'
             : 'font-medium text-[#676b72]',
