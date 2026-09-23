@@ -1,11 +1,10 @@
 import {
   index,
-  integer,
   pgEnum,
   pgTable,
-  serial,
   text,
   timestamp,
+  uuid,
 } from 'drizzle-orm/pg-core';
 import { users } from './user';
 
@@ -25,8 +24,8 @@ export const posts = pgTable(
     createdAt: timestamp('created_at', { withTimezone: true })
       .defaultNow()
       .notNull(),
-    id: serial('id').primaryKey(),
-    idUser: integer('id_user').references(() => users.id, {
+    id: uuid('id').primaryKey().defaultRandom(),
+    idUser: uuid('id_user').references(() => users.id, {
       onDelete: 'set null',
     }),
     imageUrl: text('image_url'),
