@@ -28,6 +28,7 @@ export function SuggestedUserItem({
 
           <div className="flex flex-col">
             <span className="font-bold text-[14px]">{name}</span>
+
             <small className="text-[#7e8288] text-[12px]">@{username}</small>
           </div>
         </Link>

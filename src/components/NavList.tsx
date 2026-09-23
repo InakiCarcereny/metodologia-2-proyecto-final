@@ -29,12 +29,10 @@ const NAV_ITEMS: NavList = [
 
 export function NavList(): JSX.Element {
   return (
-    <nav className="w-full">
-      <ul className="flex w-full flex-col gap-1">
-        {NAV_ITEMS.map((item) => (
-          <NavItem key={item.path} label={item.label} path={item.path} />
-        ))}
-      </ul>
-    </nav>
+    <ul className="flex w-full flex-col gap-1">
+      {NAV_ITEMS.map((item) => (
+        <NavItem key={item.path} label={item.label} path={item.path} />
+      ))}
+    </ul>
   );
 }

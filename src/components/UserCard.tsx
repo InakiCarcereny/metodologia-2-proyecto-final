@@ -1,11 +1,15 @@
 import Image from 'next/image';
 import type { JSX } from 'react';
+import { PublishButton } from '@/components/PublishButton';
 import { Separator } from '@/components/Separator';
-import { Button } from '@/components/ui/Button';
+import { CardWrapper } from '@/components/ui/CardWrapper';
 
 export function UserCard(): JSX.Element {
   return (
-    <article className="flex h-44 w-56 flex-col justify-between rounded-lg border border-[#dfe1e5] bg-[#ffffff] p-4">
+    <CardWrapper
+      as="article"
+      className="flex h-44 w-56 flex-col justify-between"
+    >
       <div className="flex gap-2">
         <Image
           alt="image"
@@ -35,9 +39,7 @@ export function UserCard(): JSX.Element {
         </small>
       </div>
 
-      <Button type="button" variant="primary">
-        Publicar
-      </Button>
-    </article>
+      <PublishButton />
+    </CardWrapper>
   );
 }

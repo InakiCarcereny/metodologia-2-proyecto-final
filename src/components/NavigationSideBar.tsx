@@ -21,9 +21,19 @@ export function NavigationSideBar(): JSX.Element {
 
         <UserCard />
 
-        <NavList />
+        <nav className="w-full">
+          <NavList />
+        </nav>
 
-        <TagList />
+        <div className="flex flex-col gap-1">
+          <span className="pl-2.5 font-medium text-[#878992] text-[12px]">
+            TUS TAGS
+          </span>
+
+          <nav className="w-full">
+            <TagList />
+          </nav>
+        </div>
       </div>
 
       <div className="flex flex-col gap-2">
