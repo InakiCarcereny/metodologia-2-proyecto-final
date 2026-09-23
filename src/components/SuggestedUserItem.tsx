@@ -15,7 +15,7 @@ export function SuggestedUserItem({
 }: SuggestedUserItemProps): JSX.Element {
   return (
     <li className="flex w-full flex-col gap-2">
-      <div className="mt-2 flex items-center justify-between">
+      <div className="mt-2 mb-2 flex items-center justify-between">
         <Link className="flex items-center gap-2" href={`/users/${username}`}>
           <Image
             alt="image"
