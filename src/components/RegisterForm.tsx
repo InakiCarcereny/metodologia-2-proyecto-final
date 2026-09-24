@@ -21,7 +21,7 @@ export function RegisterForm(): JSX.Element {
   const onSubmit: SubmitHandler<RegisterFormValues> = async (
     data: RegisterFormValues,
   ) => {
-    console.log(data);
+    return data;
   };
 
   return (
