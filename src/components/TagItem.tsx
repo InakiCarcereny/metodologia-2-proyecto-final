@@ -5,12 +5,12 @@ import { usePathname } from 'next/navigation';
 import type { JSX } from 'react';
 import { cn } from '@/lib/utils';
 
-interface NavItemProps {
+interface TagItemProps {
   label: string;
   path: string;
 }
 
-export function NavItem({ label, path }: NavItemProps): JSX.Element {
+export function TagItem({ label, path }: TagItemProps): JSX.Element {
   const pathname = usePathname();
   const isActive = pathname === path;
 
@@ -25,7 +25,7 @@ export function NavItem({ label, path }: NavItemProps): JSX.Element {
         )}
         href={path}
       >
-        {label}
+        #{label}
       </Link>
     </li>
   );

@@ -7,7 +7,7 @@ export default function RoutesLayout({
 }: LayoutProps<'/'>): JSX.Element {
   return (
     <div className="flex h-screen w-full justify-center">
-      <div className="grid w-full max-w-310 grid-cols-[14rem_1fr_14rem] gap-8">
+      <div className="grid w-full max-w-310 grid-cols-[14rem_1fr_18rem] gap-8">
         <NavigationSideBar />
 
         <main className="overflow-y-auto pt-6">{children}</main>
