@@ -90,7 +90,6 @@
         "useImportType": "warn"
       },
       "suspicious": {
-        "noArrayIndexKey": "error",
         "noCommentText": "error",
         "noConsole": "warn",
         "noDoubleEquals": "error",
