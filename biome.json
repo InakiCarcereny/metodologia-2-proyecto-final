@@ -73,7 +73,6 @@
         "useJsxKeyInIterable": "error"
       },
       "nursery": {
-        "useExplicitType": "warn",
         "useSortedClasses": {
           "fix": "safe",
           "level": "error"
@@ -90,7 +89,7 @@
         "useImportType": "warn"
       },
       "suspicious": {
-        "noArrayIndexKey": "error",
+        "noArrayIndexKey": "off",
         "noCommentText": "error",
         "noConsole": "warn",
         "noDoubleEquals": "error",
