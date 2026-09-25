@@ -1,6 +1,5 @@
 import { pgTable, primaryKey, timestamp, uuid } from 'drizzle-orm/pg-core';
-import { comments } from './comment';
-import { users } from './user';
+import { comments, users } from '@/db/schema';
 
 export const commentLikes = pgTable(
   'comment_likes',

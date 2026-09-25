@@ -1,5 +1,5 @@
 import { pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
-import { users } from './user';
+import { users } from '@/db/schema';
 
 export const profiles = pgTable('profiles', {
   avatarUrl: text('avatar_url'),

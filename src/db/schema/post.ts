@@ -6,7 +6,7 @@ import {
   timestamp,
   uuid,
 } from 'drizzle-orm/pg-core';
-import { users } from './user';
+import { users } from '@/db/schema';
 
 export const postTypes = pgEnum('post_type', [
   'snippet',

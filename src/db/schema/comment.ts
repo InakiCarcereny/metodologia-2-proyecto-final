@@ -5,8 +5,7 @@ import {
   timestamp,
   uuid,
 } from 'drizzle-orm/pg-core';
-import { posts } from './post';
-import { users } from './user';
+import { posts, users } from '@/db/schema';
 
 export const comments = pgTable('comments', {
   codeLine: text('code_line'),
