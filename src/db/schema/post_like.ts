@@ -1,4 +1,10 @@
-import { pgTable, primaryKey, timestamp, uuid } from 'drizzle-orm/pg-core';
+import {
+  pgTable,
+  primaryKey,
+  text,
+  timestamp,
+  uuid,
+} from 'drizzle-orm/pg-core';
 import { posts, users } from '@/db/schema';
 
 export const postLikes = pgTable(
@@ -10,7 +16,7 @@ export const postLikes = pgTable(
       .references(() => posts.id, {
         onDelete: 'cascade',
       }),
-    idUser: uuid('id_user')
+    idUser: text('id_user')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
   },
