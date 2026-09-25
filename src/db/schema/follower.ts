@@ -1,5 +1,5 @@
 import { pgTable, primaryKey, timestamp, uuid } from 'drizzle-orm/pg-core';
-import { users } from './user';
+import { users } from '@/db/schema';
 
 export const followers = pgTable(
   'followers',

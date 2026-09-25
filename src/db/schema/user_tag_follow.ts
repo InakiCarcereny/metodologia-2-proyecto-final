@@ -1,6 +1,5 @@
 import { pgTable, primaryKey, timestamp, uuid } from 'drizzle-orm/pg-core';
-import { tags } from './tag';
-import { users } from './user';
+import { tags, users } from '@/db/schema';
 
 export const userTagFollows = pgTable(
   'user_tag_follows',

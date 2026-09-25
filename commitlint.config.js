@@ -13,7 +13,7 @@ module.exports = {
     'footer-leading-blank': [2, 'always'],
 
     // Largo maximo del header completo (type(scope): subject)
-    'header-max-length': [2, 'always', 85],
+    'header-max-length': [2, 'always', 100],
 
     // Scope (opcional, entre parentesis) en minuscula si se usa
     'scope-case': [2, 'always', 'lower-case'],
