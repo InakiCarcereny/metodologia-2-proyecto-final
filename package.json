@@ -16,7 +16,8 @@
     "react-hook-form": "7.87.0",
     "sileo": "0.1.5",
     "tailwind-merge": "3.6.0",
-    "zod": "4.5.4"
+    "zod": "4.5.4",
+    "zustand": "5.0.15"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.2",
