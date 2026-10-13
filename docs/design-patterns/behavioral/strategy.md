@@ -45,9 +45,6 @@ La función principal que inicia sesión (`signIn()` de NextAuth) no necesita sa
 
 La promesa del patrón es verificable: si en el futuro queremos sumar otra opción (como Google), solo agregamos un provider en el array sin tocar las estrategias existentes:
 
-```ts
-// Lo único que haría falta para agregar una tercera estrategia:
-import Google from 'next-auth/providers/google';
 
 **4 · Costo**
 El principal trade-off es que cada estrategia trae su propia complejidad: OAuth requiere configuración externa (client id/secret de GitHub, redirect URIs) y una tabla `accounts` para guardar los vínculos y tokens, mientras que Credentials requiere manejar hashes de contraseña y los riesgos de seguridad propios del login manual. También hay que tener cuidado de no duplicar código en las cosas que comparten (como los errores o las redirecciones).
