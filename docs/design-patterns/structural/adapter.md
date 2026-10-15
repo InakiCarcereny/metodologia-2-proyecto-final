@@ -1,4 +1,6 @@
-## API de GitHub
+## API de GitHub (Adapter)
+
+> Esta es una decisión de diseño futura: todavía no se implementó la integración con la API de GitHub, pero se documenta de antemano el enfoque que se va a seguir cuando se agregue.
 
 **1 · Problema**
 Necesitamos mostrar los repos del usuario, sus lenguajes más usados, estrellas, etc, obtenidos de la API de GitHub. El problema es que la forma de los datos que devuelve GitHub no es la que le conviene al resto de la app. Si cada componente consume directamente la respuesta cruda de la API, toda la aplicación queda atada al contrato de GitHub: cualquier cambio en la API (un campo que se renombra, una nueva versión del endpoint) obligaría a tocar código en múltiples lugares.
