@@ -20,7 +20,7 @@ export const comments = pgTable('comments', {
     .references(() => posts.id, {
       onDelete: 'cascade',
     }),
-  idUser: uuid('id_user').references(() => users.id, {
+  idUser: text('id_user').references(() => users.id, {
     onDelete: 'set null',
   }),
 });

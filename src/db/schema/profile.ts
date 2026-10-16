@@ -1,11 +1,11 @@
-import { pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 import { users } from '@/db/schema';
 
 export const profiles = pgTable('profiles', {
   avatarUrl: text('avatar_url'),
   bio: text('bio'),
   coverUrl: text('cover_url'),
-  id: uuid('id_user')
+  id: text('id_user')
     .primaryKey()
     .references(() => users.id, { onDelete: 'cascade' }),
   location: text('location'),

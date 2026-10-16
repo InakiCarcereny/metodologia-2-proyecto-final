@@ -25,7 +25,7 @@ export const posts = pgTable(
       .defaultNow()
       .notNull(),
     id: uuid('id').primaryKey().defaultRandom(),
-    idUser: uuid('id_user').references(() => users.id, {
+    idUser: text('id_user').references(() => users.id, {
       onDelete: 'set null',
     }),
     imageUrl: text('image_url'),

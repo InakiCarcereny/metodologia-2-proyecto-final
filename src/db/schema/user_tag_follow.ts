@@ -1,4 +1,10 @@
-import { pgTable, primaryKey, timestamp, uuid } from 'drizzle-orm/pg-core';
+import {
+  pgTable,
+  primaryKey,
+  text,
+  timestamp,
+  uuid,
+} from 'drizzle-orm/pg-core';
 import { tags, users } from '@/db/schema';
 
 export const userTagFollows = pgTable(
@@ -8,7 +14,7 @@ export const userTagFollows = pgTable(
     idTag: uuid('id_tag')
       .notNull()
       .references(() => tags.id, { onDelete: 'cascade' }),
-    idUser: uuid('id_user')
+    idUser: text('id_user')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
   },
