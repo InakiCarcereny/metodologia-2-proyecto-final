@@ -2,7 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import type { JSX } from 'react';
 import { Separator } from '@/components/Separator';
-import { Button } from '@/components/ui/Button';
+import { FollowButton } from './FollowButton';
 
 interface SuggestedUserItemProps {
   name: string;
@@ -19,23 +19,23 @@ export function SuggestedUserItem({
         <Link className="flex items-center gap-2" href={`/users/${username}`}>
           <Image
             alt="image"
-            className="rounded-[10px]"
+            className="shrink-0 rounded-[10px]"
             height={36}
             loading="eager"
             src="/tired-totoro.jpg"
             width={42}
           />
 
-          <div className="flex flex-col">
-            <span className="font-bold text-[14px]">{name}</span>
+          <div className="flex min-w-0 flex-col">
+            <span className="truncate font-bold text-[14px]">{name}</span>
 
-            <small className="text-[#7e8288] text-[12px]">@{username}</small>
+            <small className="truncate text-[#7e8288] text-[12px]">
+              @{username}
+            </small>
           </div>
         </Link>
 
-        <Button className="w-15 font-light" type="button" variant="tertiary">
-          seguir
-        </Button>
+        <FollowButton className="w-15" />
       </div>
 
       <Separator />
