@@ -1,14 +1,21 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import type { JSX } from 'react/jsx-runtime';
 import { type SubmitHandler, useForm } from 'react-hook-form';
+import { register } from '@/actions/auth';
+import { FormError } from '@/components/FormError';
 import { PasswordStrength } from '@/components/PasswordStrength';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { type RegisterFormValues, registerSchema } from '@/schemas/auth';
 
 export function RegisterForm(): JSX.Element {
+  const router = useRouter();
+  const [error, setError] = useState<string | undefined>();
+
   const {
     control,
     handleSubmit,
@@ -21,7 +28,16 @@ export function RegisterForm(): JSX.Element {
   const onSubmit: SubmitHandler<RegisterFormValues> = async (
     data: RegisterFormValues,
   ) => {
-    return data;
+    setError(undefined);
+
+    const result = await register(data);
+
+    if (result.error) {
+      setError(result.error);
+      return;
+    }
+
+    router.push('/home');
   };
 
   return (
@@ -79,6 +95,8 @@ export function RegisterForm(): JSX.Element {
       <Button className="p-4" type="submit" variant="primary">
         Crear cuenta
       </Button>
+
+      <FormError message={error} />
     </form>
   );
 }
