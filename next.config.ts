@@ -12,6 +12,10 @@ const nextConfig: NextConfig = {
         hostname: 'avatars.githubusercontent.com',
         protocol: 'https',
       },
+      {
+        hostname: 'res.cloudinary.com',
+        protocol: 'https',
+      },
     ],
   },
   output: 'standalone',
