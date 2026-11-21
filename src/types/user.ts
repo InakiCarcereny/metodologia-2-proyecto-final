@@ -13,5 +13,5 @@ export type UserProfile = Pick<User, 'id' | 'username' | 'createdAt'> &
 
 export type UserCardData = Pick<
   UserProfile,
-  'id' | 'username' | 'avatarUrl' | 'postsCount'
+  'id' | 'username' | 'avatarUrl' | 'postsCount' | 'followersCount'
 >;
