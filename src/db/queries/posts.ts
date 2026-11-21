@@ -36,6 +36,7 @@ export type FeedPost = {
   viewer: {
     bookmarked: boolean;
     liked: boolean;
+    reposted: boolean;
   };
 };
 
@@ -117,9 +118,10 @@ export async function getFeedPosts({
 
   let likedIds = new Set<string>();
   let bookmarkedIds = new Set<string>();
+  let repostedIds = new Set<string>();
 
   if (viewerId) {
-    const [likedRows, bookmarkedRows] = await Promise.all([
+    const [likedRows, bookmarkedRows, repostedRows] = await Promise.all([
       db
         .select({ idPost: postLikes.idPost })
         .from(postLikes)
@@ -138,10 +140,20 @@ export async function getFeedPosts({
             inArray(bookmarks.idPost, postIds),
           ),
         ),
+      db
+        .select({ idPost: postShares.idPost })
+        .from(postShares)
+        .where(
+          and(
+            eq(postShares.idUser, viewerId),
+            inArray(postShares.idPost, postIds),
+          ),
+        ),
     ]);
 
     likedIds = new Set(likedRows.map((row) => row.idPost));
     bookmarkedIds = new Set(bookmarkedRows.map((row) => row.idPost));
+    repostedIds = new Set(repostedRows.map((row) => row.idPost));
   }
 
   return rows.map((row) => ({
@@ -164,6 +176,7 @@ export async function getFeedPosts({
     viewer: {
       bookmarked: bookmarkedIds.has(row.id),
       liked: likedIds.has(row.id),
+      reposted: repostedIds.has(row.id),
     },
   }));
 }

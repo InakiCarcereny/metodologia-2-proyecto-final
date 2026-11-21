@@ -45,4 +45,9 @@ export const createPostSchema = z
     }
   });
 
+export const postInteractionSchema = z.object({
+  idPost: z.string('Post requerido').uuid('ID de post inválido'),
+});
+
 export type CreatePostInput = z.infer<typeof createPostSchema>;
+export type PostInteractionInput = z.infer<typeof postInteractionSchema>;

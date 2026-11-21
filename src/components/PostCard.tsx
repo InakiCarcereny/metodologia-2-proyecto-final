@@ -59,11 +59,7 @@ export function PostCard({ post }: PostCardProps): JSX.Element {
       )}
 
       <footer className="border-[#dfe1e5] border-t pt-3">
-        <PostActions
-          comments={post.stats.comments}
-          likes={post.stats.likes}
-          shares={post.stats.reposts}
-        />
+        <PostActions idPost={post.id} stats={post.stats} viewer={post.viewer} />
       </footer>
     </CardWrapper>
   );
