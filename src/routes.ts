@@ -4,7 +4,7 @@ export const privateRoutes = [
   '/bookmarks',
   '/profile',
   '/tags',
-  'users',
+  '/users',
 ];
 
 export const authRoutes = ['/login', '/registro'];
