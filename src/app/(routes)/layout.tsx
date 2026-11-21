@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import type { JSX } from 'react';
 import { auth } from '@/auth';
 import { ActivitySideBar } from '@/components/ActivitySideBar';
+import { ModalRenderer } from '@/components/ModalRenderer';
 import { NavigationSideBar } from '@/components/NavigationSideBar';
 import { UserHydrator } from '@/components/UserHydrator';
 import { getUserCardDataById } from '@/data/profile';
@@ -28,6 +29,8 @@ export default async function RoutesLayout({
           <ActivitySideBar />
         </div>
       </div>
+
+      <ModalRenderer />
     </>
   );
 }
