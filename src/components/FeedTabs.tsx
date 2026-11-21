@@ -1,7 +1,8 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import type { JSX, KeyboardEvent } from 'react';
-import { useState } from 'react';
+import type { FeedTab } from '@/db/queries/posts';
 import { cn } from '@/lib/utils';
 
 const TABS = [
@@ -9,23 +10,25 @@ const TABS = [
   { label: 'de quien sigo', value: 'following' },
 ] as const;
 
-type TabValue = (typeof TABS)[number]['value'];
+export function FeedTabs({ activeTab }: { activeTab: FeedTab }): JSX.Element {
+  const router = useRouter();
 
-export function FeedTabs(): JSX.Element {
-  const [active, setActive] = useState<TabValue>('for-you');
+  function goToTab(tab: FeedTab) {
+    router.push(`/home?tab=${tab}`);
+  }
 
   function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
     if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return;
     event.preventDefault();
-    const index = TABS.findIndex((tab) => tab.value === active);
+    const index = TABS.findIndex((tab) => tab.value === activeTab);
     const next = event.key === 'ArrowRight' ? index + 1 : index - 1;
-    setActive(TABS[(next + TABS.length) % TABS.length].value);
+    goToTab(TABS[(next + TABS.length) % TABS.length].value);
   }
 
   return (
     <div className="flex gap-6" onKeyDown={handleKeyDown} role="tablist">
       {TABS.map((tab) => {
-        const isActive = tab.value === active;
+        const isActive = tab.value === activeTab;
         return (
           <button
             aria-selected={isActive}
@@ -36,7 +39,7 @@ export function FeedTabs(): JSX.Element {
                 : 'border-transparent font-medium text-[#676b72] hover:text-[#171b22]',
             )}
             key={tab.value}
-            onClick={() => setActive(tab.value)}
+            onClick={() => goToTab(tab.value)}
             role="tab"
             tabIndex={isActive ? 0 : -1}
             type="button"

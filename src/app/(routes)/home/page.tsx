@@ -26,7 +26,7 @@ export default async function Home({
       <Composer />
 
       <div className="flex justify-center">
-        <FeedTabs />
+        <FeedTabs activeTab={activeTab} />
       </div>
 
       {feed.length === 0 ? (
