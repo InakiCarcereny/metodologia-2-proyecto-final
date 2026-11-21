@@ -5,7 +5,7 @@ import GitHub from 'next-auth/providers/github';
 export const authConfig: NextAuthConfig = {
   pages: { signIn: '/login' },
   providers: [
-    GitHub,
+    GitHub({}),
     Credentials({
       authorize: async () => null,
       credentials: {

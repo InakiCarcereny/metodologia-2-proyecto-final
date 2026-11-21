@@ -6,6 +6,14 @@ const nextConfig: NextConfig = {
       bodySizeLimit: '5mb',
     },
   },
+  images: {
+    remotePatterns: [
+      {
+        hostname: 'avatars.githubusercontent.com',
+        protocol: 'https',
+      },
+    ],
+  },
   output: 'standalone',
   reactCompiler: true,
 };

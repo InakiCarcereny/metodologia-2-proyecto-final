@@ -15,11 +15,21 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     usersTable: users,
     // biome-ignore lint/suspicious/noExplicitAny: @auth/drizzle-adapter
   } as any),
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) token.sub = user.id;
+      return token;
+    },
+    async session({ session, token }) {
+      if (session.user && token.sub) session.user.id = token.sub;
+      return session;
+    },
+  },
   events: {
     async linkAccount({ account, profile, user }) {
       if (account.provider !== 'github' || !user.id) return;
 
-      const avatarUrl = (profile as { avatar_url?: string })?.avatar_url;
+      const avatarUrl = (profile as { image?: string })?.image;
 
       await db
         .insert(profiles)
@@ -37,7 +47,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           email: profile.email,
           id: profile.id.toString(),
           image: profile.avatar_url,
-          name: profile.name ?? profile.login,
           username: profile.login,
         };
       },
