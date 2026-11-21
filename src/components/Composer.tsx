@@ -1,44 +1,146 @@
+'use client';
+
+import { zodResolver } from '@hookform/resolvers/zod';
 import Image from 'next/image';
 import type { JSX } from 'react';
+import { useState, useTransition } from 'react';
+import { type SubmitHandler, useForm } from 'react-hook-form';
+import { createPost } from '@/actions/posts';
+import { type CreatePostInput, createPostSchema } from '@/schemas/post';
+import { POST_TYPE_LABELS, type PostType } from './TypePill';
 import { Button } from './ui/Button';
 import { CardWrapper } from './ui/CardWrapper';
-
-const POST_CATEGORIES = {
-  article: 'artículo',
-  question: 'pregunta',
-  snippet: 'snippet',
-} as const;
+import { Input } from './ui/Input';
 
 export function Composer(): JSX.Element {
-  return (
-    <CardWrapper className="">
-      <div className="grid grid-cols-[auto_1fr] items-center gap-x-3 gap-y-2">
-        <Image
-          alt="image"
-          className="rounded-[10px]"
-          height={36}
-          loading="eager"
-          src="/tired-totoro.jpg"
-          width={42}
-        />
-        <textarea
-          className="min-h-10 flex-1 resize-none bg-transparent pt-2 text-[#676b72] text-sm placeholder:text-[#676b72] focus:outline-none"
-          placeholder="¿Qué quieres compartir con el equipo?"
-        />
+  const {
+    control,
+    formState: { errors },
+    handleSubmit,
+    register,
+    reset,
+    setError,
+    setValue,
+    watch,
+  } = useForm<CreatePostInput>({
+    defaultValues: { content: '', type: 'article' },
+    resolver: zodResolver(createPostSchema),
+  });
 
-        <div className="col-start-2 flex flex-wrap gap-2">
-          {Object.entries(POST_CATEGORIES).map(([key, value]) => (
+  const [isPending, startTransition] = useTransition();
+  const [serverError, setServerError] = useState<string>();
+  const type = watch('type');
+
+  const onSubmit: SubmitHandler<CreatePostInput> = async (data) => {
+    setServerError(undefined);
+
+    startTransition(async () => {
+      const result = await createPost(data);
+
+      if ('error' in result) {
+        if (typeof result.error === 'string') {
+          setServerError(result.error);
+          return;
+        }
+
+        for (const [field, messages] of Object.entries(result.error)) {
+          if (messages && messages.length > 0) {
+            setError(field as keyof CreatePostInput, { message: messages[0] });
+          }
+        }
+        return;
+      }
+
+      reset();
+    });
+  };
+
+  return (
+    <CardWrapper>
+      <form className="flex flex-col gap-3" onSubmit={handleSubmit(onSubmit)}>
+        <div className="flex items-center gap-3">
+          <Image
+            alt="avatar"
+            className="rounded-[10px]"
+            height={36}
+            loading="eager"
+            src="/tired-totoro.jpg"
+            width={42}
+          />
+
+          <textarea
+            {...register('content')}
+            className="min-h-10 flex-1 resize-none bg-transparent pt-2 text-[#676b72] text-sm placeholder:text-[#676b72] focus:outline-none"
+            placeholder="¿Qué quieres compartir con el equipo?"
+          />
+        </div>
+
+        {errors.content && (
+          <span className="font-medium text-red-400 text-sm">
+            {errors.content.message}
+          </span>
+        )}
+
+        <div className="flex flex-wrap gap-2">
+          {(Object.keys(POST_TYPE_LABELS) as PostType[]).map((key) => (
             <Button
               className="w-24 font-light"
               key={key}
+              onClick={() => setValue('type', key, { shouldValidate: true })}
               type="button"
-              variant="tertiary"
+              variant={type === key ? 'primary' : 'tertiary'}
             >
-              {value}
+              {POST_TYPE_LABELS[key]}
             </Button>
           ))}
         </div>
-      </div>
+
+        {type === 'snippet' && (
+          <div className="flex flex-col gap-2">
+            <div className="grid grid-cols-2 gap-2">
+              <Input
+                control={control}
+                error={errors.codeFilename}
+                name="codeFilename"
+                placeholder="archivo.ts"
+                type="text"
+              />
+              <Input
+                control={control}
+                error={errors.codeLanguage}
+                name="codeLanguage"
+                placeholder="typescript"
+                type="text"
+              />
+            </div>
+
+            <textarea
+              {...register('codeSnippet')}
+              className="w-full resize-none rounded-lg border border-[#d6d7db] bg-white p-3 font-mono text-[#494d56] text-sm placeholder:text-[#95989f] focus:outline-none"
+              placeholder="// tu código acá"
+              rows={6}
+            />
+
+            {errors.codeSnippet && (
+              <span className="font-medium text-red-400 text-sm">
+                {errors.codeSnippet.message}
+              </span>
+            )}
+          </div>
+        )}
+
+        {serverError && (
+          <span className="font-medium text-red-400 text-sm">
+            {serverError}
+          </span>
+        )}
+
+        <div className="flex justify-end">
+          <Button disabled={isPending} type="submit" variant="primary">
+            {isPending ? 'Publicando...' : 'Publicar'}
+          </Button>
+        </div>
+      </form>
     </CardWrapper>
   );
 }
