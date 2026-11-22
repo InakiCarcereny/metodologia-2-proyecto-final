@@ -2,7 +2,9 @@ import { redirect } from 'next/navigation';
 import type { JSX } from 'react';
 import { auth } from '@/auth';
 import { ActivitySideBar } from '@/components/ActivitySideBar';
+import { ModalRenderer } from '@/components/ModalRenderer';
 import { NavigationSideBar } from '@/components/NavigationSideBar';
+import { ScrollableMain } from '@/components/ScrollableMain';
 import { UserHydrator } from '@/components/UserHydrator';
 import { getUserCardDataById } from '@/data/profile';
 
@@ -23,11 +25,13 @@ export default async function RoutesLayout({
         <div className="grid w-full max-w-310 grid-cols-[14rem_1fr_18rem] gap-8">
           <NavigationSideBar />
 
-          <main className="overflow-y-auto pt-6">{children}</main>
+          <ScrollableMain>{children}</ScrollableMain>
 
           <ActivitySideBar />
         </div>
       </div>
+
+      <ModalRenderer />
     </>
   );
 }
