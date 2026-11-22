@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import type { NextFont } from 'next/dist/compiled/@next/font';
 import { IBM_Plex_Mono } from 'next/font/google';
 import type { JSX } from 'react';
+import { Toaster } from 'sileo';
 
 const ibmPlexMono: NextFont = IBM_Plex_Mono({
   display: 'swap',
@@ -20,7 +21,15 @@ export default function RootLayout({
 }: LayoutProps<'/'>): JSX.Element {
   return (
     <html className={`${ibmPlexMono.className} h-full antialiased`} lang="en">
-      <body className="flex min-h-full flex-col">{children}</body>
+      <body className="flex min-h-full flex-col">
+        <Toaster
+          options={{ fill: '#171b22' }}
+          position="bottom-right"
+          theme="light"
+        />
+
+        {children}
+      </body>
     </html>
   );
 }
