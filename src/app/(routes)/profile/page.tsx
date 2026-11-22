@@ -5,7 +5,9 @@ import { ConnectedReposCard } from '@/components/ConnectedReposCard';
 import { GithubConnectButton } from '@/components/GithubConnectButton';
 import { GithubConnectStatus } from '@/components/GithubConnectStatus';
 import { InferredStackCard } from '@/components/InferredStackCard';
+import { PostList } from '@/components/PostList';
 import { ProfileHeader } from '@/components/ProfileHeader';
+import { ProfileTabs } from '@/components/ProfileTabs';
 import { getConnectedRepos, hasGitHubAccount } from '@/data/github';
 import { getUserProfileById } from '@/data/profile';
 import { getInferredStack } from '@/data/stack';
@@ -45,9 +47,17 @@ export default async function Profile({
         </div>
       )}
 
-      <p className="text-center font-light text-[#7e8288] text-sm">
-        Todavía no hay posts para mostrar.
-      </p>
+      <ProfileTabs
+        postsSlot={
+          <PostList
+            emptyMessage="Todavía no hay posts para mostrar."
+            posts={[]}
+          />
+        }
+        repostsSlot={
+          <PostList emptyMessage="Todavía no hizo reposts." posts={[]} />
+        }
+      />
     </div>
   );
 }

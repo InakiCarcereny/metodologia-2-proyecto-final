@@ -64,7 +64,7 @@ export function ProfileHeader({
         </div>
 
         <div className="flex flex-col">
-          <span className="font-bold text-[18px]">
+          <span className="font-bold text-2xl">
             {formatDisplayName(profile.username)}
           </span>
 
