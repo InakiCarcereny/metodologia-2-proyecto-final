@@ -19,4 +19,5 @@ export interface Post {
   tags: Pick<Tag, 'id' | 'label'>[];
   title: string;
   type: PostType;
+  viewer?: { bookmarked: boolean; liked: boolean; reposted: boolean };
 }
