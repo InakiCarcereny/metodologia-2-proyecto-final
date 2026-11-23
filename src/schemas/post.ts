@@ -23,6 +23,11 @@ export const createPostSchema = z
       .trim()
       .min(1, 'El post no puede estar vacío')
       .max(5000, 'Máximo 5000 caracteres'),
+    imageUrl: z
+      .string('Imagen requerida')
+      .trim()
+      .url('URL de imagen inválida')
+      .optional(),
     type: z.enum(postTypes.enumValues, 'Tipo de post inválido'),
   })
   .superRefine((data, ctx) => {
