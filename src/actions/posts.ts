@@ -1,10 +1,17 @@
 'use server';
 
-import { and, eq } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { auth } from '@/auth';
 import { db } from '@/db';
-import { bookmarks, postLikes, postShares, posts } from '@/db/schema';
+import {
+  bookmarks,
+  postLikes,
+  postShares,
+  posts,
+  postTags,
+  tags,
+} from '@/db/schema';
 import {
   type CreatePostInput,
   createPostSchema,
@@ -25,25 +32,67 @@ export async function createPost(input: CreatePostInput) {
     return { error: parsed.error.flatten().fieldErrors ?? {} };
   }
 
-  const { codeFilename, codeLanguage, codeSnippet, content, imageUrl, type } =
-    parsed.data;
+  const {
+    codeFilename,
+    codeLanguage,
+    codeSnippet,
+    content,
+    imageUrl,
+    tags: tagLabels,
+    type,
+  } = parsed.data;
 
   const title = content.split('\n')[0].slice(0, 80) || type;
 
+  const idUser = session.user.id;
+
   try {
-    const [post] = await db
-      .insert(posts)
-      .values({
-        codeFilename: codeFilename ?? null,
-        codeLanguage: codeLanguage ?? null,
-        codeSnippet: codeSnippet ?? null,
-        content,
-        idUser: session.user.id,
-        imageUrl: imageUrl ?? null,
-        title,
-        type,
-      })
-      .returning();
+    const post = await db.transaction(async (tx) => {
+      const [created] = await tx
+        .insert(posts)
+        .values({
+          codeFilename: codeFilename ?? null,
+          codeLanguage: codeLanguage ?? null,
+          codeSnippet: codeSnippet ?? null,
+          content,
+          idUser,
+          imageUrl: imageUrl ?? null,
+          title,
+          type,
+        })
+        .returning();
+
+      const normalizedLabels = [
+        ...new Set(
+          (tagLabels ?? [])
+            .map((label) => label.trim().toLowerCase())
+            .filter((label) => label.length > 0),
+        ),
+      ];
+
+      if (normalizedLabels.length > 0) {
+        await tx
+          .insert(tags)
+          .values(normalizedLabels.map((label) => ({ label })))
+          .onConflictDoNothing();
+
+        const tagRows = await tx
+          .select({ id: tags.id })
+          .from(tags)
+          .where(inArray(tags.label, normalizedLabels));
+
+        if (tagRows.length > 0) {
+          await tx
+            .insert(postTags)
+            .values(
+              tagRows.map((tag) => ({ idPost: created.id, idTag: tag.id })),
+            )
+            .onConflictDoNothing();
+        }
+      }
+
+      return created;
+    });
 
     revalidatePath('/home');
 
