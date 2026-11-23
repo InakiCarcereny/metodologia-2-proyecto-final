@@ -7,6 +7,7 @@ import { type SubmitHandler, useForm } from 'react-hook-form';
 import { createPost } from '@/actions/posts';
 import { ImageUploadField } from '@/components/ImageUploadField';
 import { PostCardAvatar } from '@/components/PostCardAvatar';
+import { TagInput } from '@/components/TagInput';
 import { useImageUpload } from '@/hooks/useImageUpload';
 import { type CreatePostInput, createPostSchema } from '@/schemas/post';
 import { useUserStore } from '@/store/user-store';
@@ -152,6 +153,11 @@ export function Composer({ onPublished }: ComposerProps): JSX.Element {
             )}
           </div>
         )}
+
+        <TagInput
+          onChange={(nextTags) => setValue('tags', nextTags)}
+          values={watch('tags') ?? []}
+        />
 
         <ImageUploadField
           alt="captura adjunta"
