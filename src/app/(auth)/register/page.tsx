@@ -1,17 +1,16 @@
 import { Check, GlobeIcon } from 'lucide-react';
 import Link from 'next/link';
 import type { JSX } from 'react';
+import { ActivityPreview } from '@/components/ActivityPreview';
 import { AuthLeftColumn, AuthRightColumn } from '@/components/AuthColumn';
+import { LegalFooter } from '@/components/LegalFooter';
 import { RegisterForm } from '@/components/RegisterForm';
-import { UserPreview } from '@/components/UserPreview';
 
 const ADVANTAGES: string[] = [
   'Tu perfil técnico, con tu stack real',
   '12.4k devs ya están discutiendo código acá',
   'Sin anuncios ni venta de datos',
 ];
-
-const LEGAL_LINKS: string[] = ['Normas', 'Privacidad', 'Estado del servicio'];
 
 export default function Register(): JSX.Element {
   return (
@@ -30,7 +29,7 @@ export default function Register(): JSX.Element {
             Tu feed arranca con los tags que elijas. Nada de algoritmo.
           </h3>
 
-          <UserPreview />
+          <ActivityPreview />
 
           <ul className="flex flex-col gap-1">
             {ADVANTAGES.map((advantage, index) => (
@@ -65,20 +64,7 @@ export default function Register(): JSX.Element {
             </Link>
           </span>
 
-          <footer>
-            <ul className="flex items-center gap-4">
-              {LEGAL_LINKS.map((link, index) => (
-                <li key={index}>
-                  <Link
-                    className="font-light text-[#8c9097] text-sm hover:underline"
-                    href="#"
-                  >
-                    {link}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </footer>
+          <LegalFooter />
         </div>
       </AuthRightColumn>
     </>

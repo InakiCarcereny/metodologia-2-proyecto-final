@@ -1,66 +1,53 @@
-import Image from 'next/image';
+import { Repeat2 } from 'lucide-react';
+import Link from 'next/link';
 import type { JSX } from 'react';
-import type { FeedPost } from '@/db/queries/posts';
-import { timeAgo } from '@/utils/time-ago';
-import { CodeBlock } from './CodeBlock';
-import { PostActions } from './PostActions';
-import { TypePill } from './TypePill';
-import { CardWrapper } from './ui/CardWrapper';
+import { PostCardCodeBlock } from '@/components/PostCardCodeBlock';
+import { PostCardFooter } from '@/components/PostCardFooter';
+import { PostCardHeader } from '@/components/PostCardHeader';
+import { Separator } from '@/components/Separator';
+import { CardWrapper } from '@/components/ui/CardWrapper';
+import type { Post } from '@/types/post';
+import { formatDisplayName } from '@/utils/format-display-name';
 
 interface PostCardProps {
-  post: FeedPost;
+  post: Post;
 }
 
 export function PostCard({ post }: PostCardProps): JSX.Element {
+  const hasCode = post.type === 'snippet' && Boolean(post.codeSnippet);
+
   return (
-    <CardWrapper as="article" className="flex flex-col gap-3">
-      <header className="flex items-start justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <Image
-            alt={post.author.username}
-            className="rounded-[10px]"
-            height={36}
-            loading="eager"
-            src={post.author.avatarUrl ?? '/tired-totoro.jpg'}
-            unoptimized
-            width={42}
-          />
+    <CardWrapper
+      as={Link}
+      className="flex flex-col gap-3 hover:border-[#9b9ea5]"
+      href={`/posts/${post.id}`}
+    >
+      {post.repostedBy && (
+        <p className="flex items-center gap-1 font-light text-[#7e8288] text-xs">
+          <Repeat2 size={12} />
+          Reposteado por {formatDisplayName(post.repostedBy)}
+        </p>
+      )}
 
-          <div className="flex flex-col">
-            <div className="flex items-baseline gap-1.5">
-              <span className="font-bold text-[14px]">
-                {post.author.username}
-              </span>
-              <span className="text-[#676b72] text-[12px]">
-                @{post.author.username}
-              </span>
-            </div>
+      <PostCardHeader post={post} />
 
-            <small className="font-mono text-[#878992] text-[12px]">
-              {timeAgo(post.createdAt)}
-              {/* tags go here once post_tags lands */}
-            </small>
-          </div>
-        </div>
+      <div className="flex flex-col gap-1">
+        <h3 className="font-bold text-[15px]">{post.title}</h3>
 
-        <TypePill type={post.type} />
-      </header>
+        <p className="font-light text-[#44474c] text-[14px]">{post.content}</p>
+      </div>
 
-      <p className="whitespace-pre-wrap font-sans text-[#494d56] text-[13px] leading-[1.5]">
-        {post.content}
-      </p>
-
-      {post.codeSnippet && (
-        <CodeBlock
-          code={post.codeSnippet}
+      {hasCode && (
+        <PostCardCodeBlock
           filename={post.codeFilename}
           language={post.codeLanguage}
+          snippet={post.codeSnippet as string}
         />
       )}
 
-      <footer className="border-[#dfe1e5] border-t pt-3">
-        <PostActions idPost={post.id} stats={post.stats} viewer={post.viewer} />
-      </footer>
+      <Separator />
+
+      <PostCardFooter post={post} />
     </CardWrapper>
   );
 }

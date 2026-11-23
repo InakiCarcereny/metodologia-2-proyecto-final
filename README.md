@@ -1,5 +1,7 @@
 <div align="center">
 
+<svg xmlns="http://www.w3.org/2000/svg" width="150" height="150" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-globe preview-icon"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+
 # DevHub
 
 ### Red social exclusiva para desarrolladores
@@ -22,6 +24,59 @@ Iñaki Carcereny · Valentín De Pascale · Joaquín Marcilese
 ## Descripción
 
 **DevHub** es una red social para desarrolladores. Cada usuario cuenta con un perfil integrado con la API de GitHub, donde se muestran sus repositorios y los lenguajes de programación que más utiliza. Además, permite crear publicaciones, incluyendo posts de código con syntax highlighting.
+
+---
+
+## Estructura del proyecto
+
+```
+metodologia-2-proyecto-final/
+├── .husky/               # Git hooks (pre-commit, commit-msg, etc.)
+├── .next/                # Build output de Next.js (generado)
+├── .vscode/              # Configuración del editor para el equipo
+├── docs/                 # Documentación del proyecto
+├── node_modules/         # Dependencias instaladas (generado)
+├── public/               # Assets estáticos (imágenes, íconos, etc.)
+├── src/
+│   ├── actions/          # Server actions de Next.js
+│   ├── app/              # Rutas y páginas (App Router)
+│   ├── components/       # Componentes de React y reutilizables(UI)
+│   ├── context/          # React Context
+│   ├── db/               # Esquema y configuración de Drizzle/Postgres
+│   ├── hooks/            # Custom hooks de React
+│   ├── layouts/          # Layouts compartidos entre páginas
+│   ├── lib/              # Utilidades y configuraciones
+│   ├── schemas/          # Esquemas de validación (Zod)
+│   ├── services/         # Lógica de acceso a APIs externas
+│   ├── store/            # Estado global (Zustand)
+│   ├── tests/            # Tests unitarios e integración
+│   ├── types/            # Tipos y definiciones reutilizables de TypeScript
+│   ├── utils/            # Funciones utilitarias generales
+│   ├── auth.config.ts    # Configuración base de Auth.js
+│   ├── auth.ts           # Instancia y handlers de Auth.js
+│   ├── middleware.ts     # Middleware de Next.js (rutas protegidas)
+│   └── routes.ts         # Definición de rutas públicas/privadas
+├── .dockerignore
+├── .editorconfig
+├── .env                  # Variables de entorno locales (no versionado)
+├── .env.example          # Plantilla de variables de entorno
+├── .gitignore
+├── biome.json            # Configuración de linting/formatting
+├── commitlint.config.js  # Reglas para mensajes de commit
+├── docker-compose.yml    # Orquestación de contenedores (app + DB)
+├── Dockerfile
+├── drizzle.config.ts     # Configuración de Drizzle ORM
+├── next-env.d.ts
+├── next.config.ts
+├── package.json
+├── pnpm-lock.yaml
+├── pnpm-workspace.yaml
+├── postcss.config.mjs
+├── README.md
+├── tsconfig.json
+├── vitest.config.ts      # Configuración de Vitest
+└── vitest.setup.ts
+```
 
 ---
 
@@ -59,11 +114,13 @@ cp .env.example .env
 Variables necesarias:
 
 ```env
-DATABASE_URL=postgres://postgres:postgres@localhost:5432/mi_app
+DATABASE_URL=
 
 CLOUDINARY_CLOUD_NAME=
 CLOUDINARY_API_KEY=
 CLOUDINARY_API_SECRET=
+
+AUTH_SECRET=
 ```
 
 ### 4. Levantar la base de datos
@@ -158,6 +215,10 @@ docker compose up --build
 - [Drizzle ORM](https://orm.drizzle.team/)
 - [pg](https://node-postgres.com/)
 
+### Manejo de estado
+
+- [Zustand](https://zustand-demo.pmnd.rs/)
+
 ### Formularios y validación
 
 - [React Hook Form](https://react-hook-form.com/)
@@ -166,6 +227,7 @@ docker compose up --build
 
 ### Autenticación
 
+- [Auth.js](https://authjs.dev/)
 - [bcrypt](https://github.com/kelektiv/node.bcrypt.js)
 
 ### Almacenamiento de archivos
@@ -207,3 +269,9 @@ docker compose up --build
 - [Neon](https://neon.tech/)
 
 ---
+
+<div align="center">
+
+_Proyecto académico — Metodología de Sistemas II, UTN_
+
+</div>

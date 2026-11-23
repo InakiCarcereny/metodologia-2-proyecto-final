@@ -1,4 +1,4 @@
-import { integer, pgTable, primaryKey, text } from 'drizzle-orm/pg-core';
+import { integer, pgTable, primaryKey, text, uuid } from 'drizzle-orm/pg-core';
 import type { AdapterAccountType } from 'next-auth/adapters';
 import { users } from '@/db/schema';
 
@@ -15,7 +15,7 @@ export const accounts = pgTable(
     session_state: text('session_state'),
     token_type: text('token_type'),
     type: text('type').$type<AdapterAccountType>().notNull(),
-    userId: text('user_id')
+    userId: uuid('user_id')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
   },

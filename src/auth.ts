@@ -3,34 +3,54 @@ import bcrypt from 'bcryptjs';
 import { eq } from 'drizzle-orm';
 import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
+import GitHub, { type GitHubProfile } from 'next-auth/providers/github';
 import { authConfig } from '@/auth.config';
 import { db } from '@/db';
-import { profiles, users } from '@/db/schema';
+import { accounts, profiles, users } from '@/db/schema';
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   ...authConfig,
-  adapter: DrizzleAdapter(db),
+  adapter: DrizzleAdapter(db, {
+    accountsTable: accounts,
+    usersTable: users,
+    // biome-ignore lint/suspicious/noExplicitAny: @auth/drizzle-adapter
+  } as any),
   callbacks: {
-    async signIn({ user, account, profile }): Promise<boolean> {
-      if (account?.provider === 'github' && profile) {
-        if (!user.id) return false;
+    async jwt({ token, user }) {
+      if (user) token.sub = user.id;
+      return token;
+    },
+    async session({ session, token }) {
+      if (session.user && token.sub) session.user.id = token.sub;
+      return session;
+    },
+  },
+  events: {
+    async linkAccount({ account, profile, user }) {
+      if (account.provider !== 'github' || !user.id) return;
 
-        await db
-          .insert(profiles)
-          .values({
-            avatarUrl: profile.avatar_url as string,
-            id: user.id,
-          })
-          .onConflictDoUpdate({
-            set: { avatarUrl: profile.avatar_url as string },
-            target: profiles.id,
-          });
-      }
-      return true;
+      const avatarUrl = (profile as { image?: string })?.image;
+
+      await db
+        .insert(profiles)
+        .values({ avatarUrl, id: user.id })
+        .onConflictDoUpdate({
+          set: { avatarUrl },
+          target: profiles.id,
+        });
     },
   },
   providers: [
-    ...authConfig.providers.filter((p) => p.name !== 'credentials'),
+    GitHub({
+      profile(profile: GitHubProfile) {
+        return {
+          email: profile.email,
+          id: profile.id.toString(),
+          image: profile.avatar_url,
+          username: profile.login,
+        };
+      },
+    }),
     Credentials({
       authorize: async (credentials) => {
         const [user] = await db
