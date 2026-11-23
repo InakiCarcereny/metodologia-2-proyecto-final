@@ -7,7 +7,7 @@ import { PostList } from '@/components/PostList';
 import { ProfileHeader } from '@/components/ProfileHeader';
 import { ProfileTabs } from '@/components/ProfileTabs';
 import { getConnectedRepos } from '@/data/github';
-import { getUserProfileByUsername } from '@/data/profile';
+import { getUserProfileByUsername, isFollowingUser } from '@/data/profile';
 import { getInferredStack } from '@/data/stack';
 import { getUserPosts, getUserReposts } from '@/db/queries/posts';
 
@@ -22,20 +22,30 @@ export default async function User({
   const session = await auth();
   if (session?.user?.id === profile.id) redirect('/profile');
 
-  const [stack, repos, userPosts, userReposts] = await Promise.all([
-    getInferredStack(profile.id),
-    getConnectedRepos(profile.id),
-    getUserPosts({ idUser: profile.id, viewerId: session?.user?.id }),
-    getUserReposts({ idUser: profile.id, viewerId: session?.user?.id }),
-  ]);
+  const [stack, repos, userPosts, userReposts, isFollowing] = await Promise.all(
+    [
+      getInferredStack(profile.id),
+      getConnectedRepos(profile.id),
+      getUserPosts({ idUser: profile.id, viewerId: session?.user?.id }),
+      getUserReposts({ idUser: profile.id, viewerId: session?.user?.id }),
+      session?.user?.id
+        ? isFollowingUser(session.user.id, profile.id)
+        : Promise.resolve(false),
+    ],
+  );
 
   return (
     <div className="flex flex-col gap-6">
-      <ProfileHeader isOwnProfile={false} profile={profile} />
+      <ProfileHeader
+        isFollowing={isFollowing}
+        isOwnProfile={false}
+        profile={profile}
+      />
 
       {(stack.length > 0 || repos.length > 0) && (
         <div className="grid grid-cols-2 gap-4">
           <InferredStackCard stack={stack} />
+
           <ConnectedReposCard repos={repos} />
         </div>
       )}

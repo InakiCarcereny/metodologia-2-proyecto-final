@@ -1,4 +1,4 @@
-import { count, eq, type SQL } from 'drizzle-orm';
+import { and, count, eq, ne, notInArray, type SQL, sql } from 'drizzle-orm';
 import { db } from '@/db';
 import { followers, posts, profiles, users } from '@/db/schema';
 import type { UserCardData, UserProfile } from '@/types/user';
@@ -28,6 +28,21 @@ async function countFollowing(idFollower: string): Promise<number> {
     .where(eq(followers.idFollower, idFollower));
 
   return row?.value ?? 0;
+}
+
+export async function isFollowingUser(
+  followerId: string,
+  targetId: string,
+): Promise<boolean> {
+  const [row] = await db
+    .select({ idUser: followers.idUser })
+    .from(followers)
+    .where(
+      and(eq(followers.idFollower, followerId), eq(followers.idUser, targetId)),
+    )
+    .limit(1);
+
+  return Boolean(row);
 }
 
 async function getUserProfile(
@@ -101,5 +116,49 @@ export async function getUserCardDataById(
     };
   } catch {
     return null;
+  }
+}
+
+export async function getSuggestedUserCards(
+  currentUserId: string,
+  limit = 3,
+): Promise<UserCardData[]> {
+  try {
+    const rows = await db
+      .select({
+        avatarUrl: profiles.avatarUrl,
+        id: users.id,
+        postsCount: count(posts.id).mapWith(Number),
+        username: users.username,
+      })
+      .from(users)
+      .leftJoin(profiles, eq(profiles.id, users.id))
+      .leftJoin(posts, eq(posts.idUser, users.id))
+      .where(
+        and(
+          ne(users.id, currentUserId),
+          notInArray(
+            users.id,
+            db
+              .select({ id: followers.idUser })
+              .from(followers)
+              .where(eq(followers.idFollower, currentUserId)),
+          ),
+        ),
+      )
+      .groupBy(users.id, profiles.avatarUrl, users.username)
+      .orderBy(sql`RANDOM()`)
+      .limit(limit);
+
+    const followersCounts = await Promise.all(
+      rows.map((row) => countFollowers(row.id)),
+    );
+
+    return rows.map((row, i) => ({
+      ...row,
+      followersCount: followersCounts[i] ?? 0,
+    }));
+  } catch {
+    return [];
   }
 }

@@ -1,34 +1,18 @@
 import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import type { JSX } from 'react';
+import { auth } from '@/auth';
 import { SuggestedUserItem } from '@/components/SuggestedUserItem';
 import { CardWrapper } from '@/components/ui/CardWrapper';
+import { getSuggestedUserCards } from '@/data/profile';
 
-interface User {
-  name: string;
-  username: string;
-}
+export async function SuggestedUsers(): Promise<JSX.Element | null> {
+  const session = await auth();
+  if (!session?.user?.id) return null;
 
-type Users = User[];
+  const users = await getSuggestedUserCards(session.user.id);
+  if (users.length === 0) return null;
 
-// CADA UNO DE LOS USUARIOS SUGERIDOS VIENE DE LA DB
-// CADA UNO DE LOS USURIOS VA A SER UNA RUTA DINAMICA
-const USERS: Users = [
-  {
-    name: 'Nadia Kern',
-    username: 'nadia.kern',
-  },
-  {
-    name: 'Tomar Iriarte',
-    username: 'tomi.pg',
-  },
-  {
-    name: 'Ivo Menendez',
-    username: 'ivo.wasm',
-  },
-] as const satisfies Users;
-
-export function SuggestedUsers(): JSX.Element {
   return (
     <CardWrapper as="section" className="flex flex-col gap-2">
       <h2 className="font-medium text-[#878992] text-[12px]">
@@ -36,10 +20,11 @@ export function SuggestedUsers(): JSX.Element {
       </h2>
 
       <ul>
-        {USERS.map((user) => (
+        {users.map((user) => (
           <SuggestedUserItem
-            key={user.username}
-            name={user.name}
+            avatarUrl={user.avatarUrl}
+            id={user.id}
+            key={user.id}
             username={user.username}
           />
         ))}

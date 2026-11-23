@@ -1,19 +1,25 @@
 import type { JSX } from 'react';
-import { Button } from '@/components/ui/Button';
-import { cn } from '@/lib/utils';
+import { followUser, unfollowUser } from '@/actions/follow';
+import { FollowToggleButton } from '@/components/FollowToggleButton';
 
 interface FollowButtonProps {
   className?: string;
+  initialIsFollowing?: boolean;
+  userId: string;
 }
 
-export function FollowButton({ className }: FollowButtonProps): JSX.Element {
+export function FollowButton({
+  className,
+  initialIsFollowing,
+  userId,
+}: FollowButtonProps): JSX.Element {
   return (
-    <Button
-      className={cn('font-light', className)}
-      type="button"
-      variant="tertiary"
-    >
-      seguir
-    </Button>
+    <FollowToggleButton
+      className={className}
+      follow={followUser}
+      id={userId}
+      initialIsFollowing={initialIsFollowing}
+      unfollow={unfollowUser}
+    />
   );
 }

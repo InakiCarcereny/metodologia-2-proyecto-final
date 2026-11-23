@@ -13,6 +13,7 @@ export interface Post {
   createdAt: Date;
   id: string;
   imageUrl: string | null;
+  isOwnPost: boolean;
   isPinned?: boolean;
   likesCount: number;
   repostedBy?: string;

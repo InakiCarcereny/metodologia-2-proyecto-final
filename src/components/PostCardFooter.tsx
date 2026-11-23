@@ -107,14 +107,16 @@ export function PostCardFooter({ post }: PostCardFooterProps): JSX.Element {
         />
       </div>
 
-      <PostCardFooterButton
-        activeClassName="bg-[#eaf1fd] text-[#3b6fd4]"
-        fillIconWhenActive
-        hoverClassName="hover:bg-[#eaf1fd] hover:text-[#3b6fd4]"
-        icon={Bookmark}
-        isActive={state.bookmarked}
-        onClick={handleBookmark}
-      />
+      {!post.isOwnPost && (
+        <PostCardFooterButton
+          activeClassName="bg-[#fdf1df] text-[#b9790a]"
+          fillIconWhenActive
+          hoverClassName="hover:bg-[#fdf1df] hover:text-[#b9790a]"
+          icon={Bookmark}
+          isActive={state.bookmarked}
+          onClick={handleBookmark}
+        />
+      )}
     </footer>
   );
 }
