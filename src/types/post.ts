@@ -12,6 +12,7 @@ export interface Post {
   content: string;
   createdAt: Date;
   id: string;
+  isOwnPost: boolean;
   isPinned?: boolean;
   likesCount: number;
   repostedBy?: string;
