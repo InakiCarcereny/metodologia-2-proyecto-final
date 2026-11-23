@@ -1,4 +1,5 @@
 import { and, count, desc, eq, inArray, or, type SQL } from 'drizzle-orm';
+import { alias } from 'drizzle-orm/pg-core';
 import { db } from '@/db';
 import {
   bookmarks,
@@ -10,57 +11,40 @@ import {
   profiles,
   users,
 } from '@/db/schema';
-import type { Post } from '@/types/post';
+import type { Post, PostType } from '@/types/post';
 
 export const FEED_PAGE_SIZE = 20;
 
 export type FeedTab = 'for-you' | 'following';
 
-export async function getFeedPosts({
-  limit = FEED_PAGE_SIZE,
-  offset = 0,
-  tab = 'for-you',
-  viewerId,
-}: {
-  limit?: number;
-  offset?: number;
-  tab?: FeedTab;
-  viewerId?: string;
-}): Promise<Post[]> {
-  let where: SQL | undefined;
+const POST_COLUMNS = {
+  avatarUrl: profiles.avatarUrl,
+  codeFilename: posts.codeFilename,
+  codeLanguage: posts.codeLanguage,
+  codeSnippet: posts.codeSnippet,
+  content: posts.content,
+  createdAt: posts.createdAt,
+  id: posts.id,
+  title: posts.title,
+  type: posts.type,
+  username: users.username,
+};
 
-  if (tab === 'following') {
-    if (!viewerId) return [];
+interface PostRow {
+  avatarUrl: string | null;
+  codeFilename: string | null;
+  codeLanguage: string | null;
+  codeSnippet: string | null;
+  content: string;
+  createdAt: Date;
+  id: string;
+  repostedBy?: string | null;
+  title: string;
+  type: PostType;
+  username: string;
+}
 
-    const followedIds = db
-      .select({ id: followers.idUser })
-      .from(followers)
-      .where(eq(followers.idFollower, viewerId));
-
-    where = or(eq(posts.idUser, viewerId), inArray(posts.idUser, followedIds));
-  }
-
-  const rows = await db
-    .select({
-      avatarUrl: profiles.avatarUrl,
-      codeFilename: posts.codeFilename,
-      codeLanguage: posts.codeLanguage,
-      codeSnippet: posts.codeSnippet,
-      content: posts.content,
-      createdAt: posts.createdAt,
-      id: posts.id,
-      title: posts.title,
-      type: posts.type,
-      username: users.username,
-    })
-    .from(posts)
-    .innerJoin(users, eq(users.id, posts.idUser))
-    .leftJoin(profiles, eq(profiles.id, users.id))
-    .where(where)
-    .orderBy(desc(posts.createdAt))
-    .limit(limit)
-    .offset(offset);
-
+async function buildPosts(rows: PostRow[], viewerId?: string): Promise<Post[]> {
   if (rows.length === 0) return [];
 
   const postIds = rows.map((row) => row.id);
@@ -153,5 +137,89 @@ export async function getFeedPosts({
       liked: likedIds.has(row.id),
       reposted: repostedIds.has(row.id),
     },
+    ...(row.repostedBy ? { repostedBy: row.repostedBy } : {}),
   }));
+}
+
+export async function getFeedPosts({
+  limit = FEED_PAGE_SIZE,
+  offset = 0,
+  tab = 'for-you',
+  viewerId,
+}: {
+  limit?: number;
+  offset?: number;
+  tab?: FeedTab;
+  viewerId?: string;
+}): Promise<Post[]> {
+  let where: SQL | undefined;
+
+  if (tab === 'following') {
+    if (!viewerId) return [];
+
+    const followedIds = db
+      .select({ id: followers.idUser })
+      .from(followers)
+      .where(eq(followers.idFollower, viewerId));
+
+    where = or(eq(posts.idUser, viewerId), inArray(posts.idUser, followedIds));
+  }
+
+  const rows = await db
+    .select(POST_COLUMNS)
+    .from(posts)
+    .innerJoin(users, eq(users.id, posts.idUser))
+    .leftJoin(profiles, eq(profiles.id, users.id))
+    .where(where)
+    .orderBy(desc(posts.createdAt))
+    .limit(limit)
+    .offset(offset);
+
+  return buildPosts(rows, viewerId);
+}
+
+export async function getUserPosts({
+  idUser,
+  limit = FEED_PAGE_SIZE,
+  viewerId,
+}: {
+  idUser: string;
+  limit?: number;
+  viewerId?: string;
+}): Promise<Post[]> {
+  const rows = await db
+    .select(POST_COLUMNS)
+    .from(posts)
+    .innerJoin(users, eq(users.id, posts.idUser))
+    .leftJoin(profiles, eq(profiles.id, users.id))
+    .where(eq(posts.idUser, idUser))
+    .orderBy(desc(posts.createdAt))
+    .limit(limit);
+
+  return buildPosts(rows, viewerId);
+}
+
+export async function getUserReposts({
+  idUser,
+  limit = FEED_PAGE_SIZE,
+  viewerId,
+}: {
+  idUser: string;
+  limit?: number;
+  viewerId?: string;
+}): Promise<Post[]> {
+  const sharer = alias(users, 'sharer');
+
+  const rows = await db
+    .select({ ...POST_COLUMNS, repostedBy: sharer.username })
+    .from(postShares)
+    .innerJoin(posts, eq(posts.id, postShares.idPost))
+    .innerJoin(users, eq(users.id, posts.idUser))
+    .leftJoin(profiles, eq(profiles.id, users.id))
+    .innerJoin(sharer, eq(sharer.id, postShares.idUser))
+    .where(eq(postShares.idUser, idUser))
+    .orderBy(desc(postShares.createdAt))
+    .limit(limit);
+
+  return buildPosts(rows, viewerId);
 }
