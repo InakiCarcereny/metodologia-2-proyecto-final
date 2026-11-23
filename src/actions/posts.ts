@@ -22,10 +22,10 @@ export async function createPost(input: CreatePostInput) {
   const parsed = createPostSchema.safeParse(input);
 
   if (!parsed.success) {
-    return { error: parsed.error.flatten().fieldErrors };
+    return { error: parsed.error.flatten().fieldErrors ?? {} };
   }
 
-  const { codeFilename, codeLanguage, codeSnippet, content, type } =
+  const { codeFilename, codeLanguage, codeSnippet, content, imageUrl, type } =
     parsed.data;
 
   const title = content.split('\n')[0].slice(0, 80) || type;
@@ -39,6 +39,7 @@ export async function createPost(input: CreatePostInput) {
         codeSnippet: codeSnippet ?? null,
         content,
         idUser: session.user.id,
+        imageUrl: imageUrl ?? null,
         title,
         type,
       })
