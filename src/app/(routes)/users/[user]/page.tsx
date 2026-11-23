@@ -9,6 +9,7 @@ import { ProfileTabs } from '@/components/ProfileTabs';
 import { getConnectedRepos } from '@/data/github';
 import { getUserProfileByUsername } from '@/data/profile';
 import { getInferredStack } from '@/data/stack';
+import { getUserPosts, getUserReposts } from '@/db/queries/posts';
 
 export default async function User({
   params,
@@ -21,9 +22,11 @@ export default async function User({
   const session = await auth();
   if (session?.user?.id === profile.id) redirect('/profile');
 
-  const [stack, repos] = await Promise.all([
+  const [stack, repos, userPosts, userReposts] = await Promise.all([
     getInferredStack(profile.id),
     getConnectedRepos(profile.id),
+    getUserPosts({ idUser: profile.id, viewerId: session?.user?.id }),
+    getUserReposts({ idUser: profile.id, viewerId: session?.user?.id }),
   ]);
 
   return (
@@ -41,11 +44,14 @@ export default async function User({
         postsSlot={
           <PostList
             emptyMessage="Todavía no hay posts para mostrar."
-            posts={[]}
+            posts={userPosts}
           />
         }
         repostsSlot={
-          <PostList emptyMessage="Todavía no hizo reposts." posts={[]} />
+          <PostList
+            emptyMessage="Todavía no hizo reposts."
+            posts={userReposts}
+          />
         }
       />
     </div>
