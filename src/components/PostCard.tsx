@@ -1,5 +1,4 @@
 import { Repeat2 } from 'lucide-react';
-import Link from 'next/link';
 import type { JSX } from 'react';
 import { PostCardCodeBlock } from '@/components/PostCardCodeBlock';
 import { PostCardFooter } from '@/components/PostCardFooter';
@@ -17,11 +16,7 @@ export function PostCard({ post }: PostCardProps): JSX.Element {
   const hasCode = post.type === 'snippet' && Boolean(post.codeSnippet);
 
   return (
-    <CardWrapper
-      as={Link}
-      className="flex flex-col gap-3 hover:border-[#9b9ea5]"
-      href={`/posts/${post.id}`}
-    >
+    <CardWrapper as="article" className="flex flex-col gap-3">
       {post.repostedBy && (
         <p className="flex items-center gap-1 font-light text-[#7e8288] text-xs">
           <Repeat2 size={12} />
@@ -31,11 +26,9 @@ export function PostCard({ post }: PostCardProps): JSX.Element {
 
       <PostCardHeader post={post} />
 
-      <div className="flex flex-col gap-1">
-        <h3 className="font-bold text-[15px]">{post.title}</h3>
-
-        <p className="font-light text-[#44474c] text-[14px]">{post.content}</p>
-      </div>
+      <p className="whitespace-pre-wrap font-sans text-[#494d56] text-[13px] leading-[1.5]">
+        {post.content}
+      </p>
 
       {hasCode && (
         <PostCardCodeBlock
