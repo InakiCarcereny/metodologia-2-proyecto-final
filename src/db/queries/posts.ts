@@ -25,6 +25,7 @@ const POST_COLUMNS = {
   content: posts.content,
   createdAt: posts.createdAt,
   id: posts.id,
+  imageUrl: posts.imageUrl,
   title: posts.title,
   type: posts.type,
   username: users.username,
@@ -38,6 +39,7 @@ interface PostRow {
   content: string;
   createdAt: Date;
   id: string;
+  imageUrl: string | null;
   repostedBy?: string | null;
   title: string;
   type: PostType;
@@ -127,6 +129,7 @@ async function buildPosts(rows: PostRow[], viewerId?: string): Promise<Post[]> {
     content: row.content,
     createdAt: row.createdAt,
     id: row.id,
+    imageUrl: row.imageUrl,
     likesCount: likesById.get(row.id) ?? 0,
     sharesCount: repostsById.get(row.id) ?? 0,
     tags: [],

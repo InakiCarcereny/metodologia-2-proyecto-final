@@ -1,4 +1,5 @@
 import { Repeat2 } from 'lucide-react';
+import Image from 'next/image';
 import type { JSX } from 'react';
 import { PostCardCodeBlock } from '@/components/PostCardCodeBlock';
 import { PostCardFooter } from '@/components/PostCardFooter';
@@ -29,6 +30,16 @@ export function PostCard({ post }: PostCardProps): JSX.Element {
       <p className="whitespace-pre-wrap font-sans text-[#494d56] text-[13px] leading-[1.5]">
         {post.content}
       </p>
+
+      {post.imageUrl && (
+        <Image
+          alt="captura adjunta"
+          className="h-auto w-full rounded-lg border border-[#dfe1e5]"
+          height={338}
+          src={post.imageUrl}
+          width={600}
+        />
+      )}
 
       {hasCode && (
         <PostCardCodeBlock
