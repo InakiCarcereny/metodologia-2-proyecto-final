@@ -8,10 +8,13 @@ import {
   postLikes,
   postShares,
   posts,
+  postTags,
   profiles,
+  tags,
   users,
 } from '@/db/schema';
 import type { Post, PostType } from '@/types/post';
+import type { Tag } from '@/types/tag';
 
 export const FEED_PAGE_SIZE = 20;
 
@@ -53,7 +56,7 @@ async function buildPosts(rows: PostRow[], viewerId?: string): Promise<Post[]> {
 
   const postIds = rows.map((row) => row.id);
 
-  const [commentCounts, likeCounts, repostCounts] = await Promise.all([
+  const [commentCounts, likeCounts, repostCounts, tagRows] = await Promise.all([
     db
       .select({ idPost: comments.idPost, total: count() })
       .from(comments)
@@ -69,6 +72,11 @@ async function buildPosts(rows: PostRow[], viewerId?: string): Promise<Post[]> {
       .from(postShares)
       .where(inArray(postShares.idPost, postIds))
       .groupBy(postShares.idPost),
+    db
+      .select({ id: tags.id, idPost: postTags.idPost, label: tags.label })
+      .from(postTags)
+      .innerJoin(tags, eq(tags.id, postTags.idTag))
+      .where(inArray(postTags.idPost, postIds)),
   ]);
 
   const commentsById = new Map(
@@ -78,6 +86,13 @@ async function buildPosts(rows: PostRow[], viewerId?: string): Promise<Post[]> {
   const repostsById = new Map(
     repostCounts.map((row) => [row.idPost, row.total]),
   );
+
+  const tagsByPost = new Map<string, Pick<Tag, 'id' | 'label'>[]>();
+  for (const row of tagRows) {
+    const current = tagsByPost.get(row.idPost) ?? [];
+    current.push({ id: row.id, label: row.label });
+    tagsByPost.set(row.idPost, current);
+  }
 
   let likedIds = new Set<string>();
   let bookmarkedIds = new Set<string>();
@@ -135,7 +150,7 @@ async function buildPosts(rows: PostRow[], viewerId?: string): Promise<Post[]> {
     isOwnPost: viewerId === row.idUser,
     likesCount: likesById.get(row.id) ?? 0,
     sharesCount: repostsById.get(row.id) ?? 0,
-    tags: [],
+    tags: tagsByPost.get(row.id) ?? [],
     title: row.title,
     type: row.type,
     viewer: {
@@ -225,6 +240,32 @@ export async function getUserReposts({
     .innerJoin(sharer, eq(sharer.id, postShares.idUser))
     .where(eq(postShares.idUser, idUser))
     .orderBy(desc(postShares.createdAt))
+    .limit(limit);
+
+  return buildPosts(rows, viewerId);
+}
+
+export async function getPostsByTagLabel(
+  label: string,
+  {
+    limit = FEED_PAGE_SIZE,
+    viewerId,
+  }: {
+    limit?: number;
+    viewerId?: string;
+  } = {},
+): Promise<Post[]> {
+  const normalized = label.trim().toLowerCase();
+
+  const rows = await db
+    .select(POST_COLUMNS)
+    .from(posts)
+    .innerJoin(users, eq(users.id, posts.idUser))
+    .leftJoin(profiles, eq(profiles.id, users.id))
+    .innerJoin(postTags, eq(postTags.idPost, posts.id))
+    .innerJoin(tags, eq(tags.id, postTags.idTag))
+    .where(eq(tags.label, normalized))
+    .orderBy(desc(posts.createdAt))
     .limit(limit);
 
   return buildPosts(rows, viewerId);
