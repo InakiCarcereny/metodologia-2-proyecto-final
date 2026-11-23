@@ -2,6 +2,7 @@
 
 import type { JSX } from 'react';
 import { EditProfileModal } from '@/components/EditProfileModal';
+import { PublishModal } from '@/components/PublishModal';
 import { useModalStore } from '@/store/modal-store';
 
 export function ModalRenderer(): JSX.Element | null {
@@ -11,6 +12,8 @@ export function ModalRenderer(): JSX.Element | null {
   if (!isOpen) return null;
 
   switch (type) {
+    case 'create-post':
+      return <PublishModal />;
     case 'edit-profile':
       return <EditProfileModal />;
     default:

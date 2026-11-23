@@ -15,7 +15,11 @@ import { Button } from './ui/Button';
 import { CardWrapper } from './ui/CardWrapper';
 import { Input } from './ui/Input';
 
-export function Composer(): JSX.Element {
+interface ComposerProps {
+  onPublished?: () => void;
+}
+
+export function Composer({ onPublished }: ComposerProps): JSX.Element {
   const user = useUserStore((s) => s.user);
   const {
     control,
@@ -75,6 +79,7 @@ export function Composer(): JSX.Element {
 
       reset();
       imageUpload.setUrl(null);
+      onPublished?.();
     });
   };
 
@@ -114,41 +119,39 @@ export function Composer(): JSX.Element {
           ))}
         </div>
 
-        <div className="flex flex-col gap-2">
-          <div className="grid grid-cols-2 gap-2">
-            <Input
-              control={control}
-              error={errors.codeFilename}
-              name="codeFilename"
-              placeholder="archivo.ts"
-              type="text"
+        {type === 'snippet' && (
+          <div className="flex flex-col gap-2">
+            <div className="grid grid-cols-2 gap-2">
+              <Input
+                control={control}
+                error={errors.codeFilename}
+                name="codeFilename"
+                placeholder="archivo.ts"
+                type="text"
+              />
+              <Input
+                control={control}
+                error={errors.codeLanguage}
+                name="codeLanguage"
+                placeholder="typescript"
+                type="text"
+              />
+            </div>
+
+            <textarea
+              {...register('codeSnippet')}
+              className="w-full resize-none rounded-lg border border-[#d6d7db] bg-white p-3 font-mono text-[#494d56] text-sm placeholder:text-[#95989f] focus:outline-none"
+              placeholder="// tu código acá"
+              rows={6}
             />
-            <Input
-              control={control}
-              error={errors.codeLanguage}
-              name="codeLanguage"
-              placeholder="typescript"
-              type="text"
-            />
+
+            {errors.codeSnippet && (
+              <span className="font-medium text-red-400 text-sm">
+                {errors.codeSnippet.message}
+              </span>
+            )}
           </div>
-
-          <textarea
-            {...register('codeSnippet')}
-            className="w-full resize-none rounded-lg border border-[#d6d7db] bg-white p-3 font-mono text-[#494d56] text-sm placeholder:text-[#95989f] focus:outline-none"
-            placeholder={
-              type === 'snippet'
-                ? '// tu código acá'
-                : '// código opcional (dejalo vacío si no aplica)'
-            }
-            rows={6}
-          />
-
-          {errors.codeSnippet && (
-            <span className="font-medium text-red-400 text-sm">
-              {errors.codeSnippet.message}
-            </span>
-          )}
-        </div>
+        )}
 
         <ImageUploadField
           alt="captura adjunta"
