@@ -1,11 +1,13 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import Image from 'next/image';
 import type { JSX } from 'react';
 import { useState, useTransition } from 'react';
 import { type SubmitHandler, useForm } from 'react-hook-form';
 import { createPost } from '@/actions/posts';
+import { ImageUploadField } from '@/components/ImageUploadField';
+import { PostCardAvatar } from '@/components/PostCardAvatar';
+import { useImageUpload } from '@/hooks/useImageUpload';
 import { type CreatePostInput, createPostSchema } from '@/schemas/post';
 import { useUserStore } from '@/store/user-store';
 import { POST_TYPE_LABELS, type PostType } from './TypePill';
@@ -29,9 +31,22 @@ export function Composer(): JSX.Element {
     resolver: zodResolver(createPostSchema),
   });
 
+  const imageUpload = useImageUpload({
+    errorMessage: 'No se pudo subir la imagen',
+    onPersist: async (url) => {
+      setValue('imageUrl', url);
+      return {};
+    },
+  });
+
   const [isPending, startTransition] = useTransition();
   const [serverError, setServerError] = useState<string>();
   const type = watch('type');
+
+  function handleRemoveImage(): void {
+    imageUpload.setUrl(null);
+    setValue('imageUrl', undefined);
+  }
 
   const onSubmit: SubmitHandler<CreatePostInput> = async (data) => {
     setServerError(undefined);
@@ -59,6 +74,7 @@ export function Composer(): JSX.Element {
       }
 
       reset();
+      imageUpload.setUrl(null);
     });
   };
 
@@ -66,14 +82,9 @@ export function Composer(): JSX.Element {
     <CardWrapper>
       <form className="flex flex-col gap-3" onSubmit={handleSubmit(onSubmit)}>
         <div className="flex items-center gap-3">
-          <Image
-            alt={`${user?.username ?? 'user'} avatar`}
-            className="rounded-[10px]"
-            height={36}
-            loading="eager"
-            src={user?.avatarUrl ?? '/tired-totoro.jpg'}
-            unoptimized
-            width={42}
+          <PostCardAvatar
+            avatarUrl={user?.avatarUrl ?? null}
+            username={user?.username ?? 'user'}
           />
 
           <textarea
@@ -103,37 +114,73 @@ export function Composer(): JSX.Element {
           ))}
         </div>
 
-        {type === 'snippet' && (
-          <div className="flex flex-col gap-2">
-            <div className="grid grid-cols-2 gap-2">
-              <Input
-                control={control}
-                error={errors.codeFilename}
-                name="codeFilename"
-                placeholder="archivo.ts"
-                type="text"
-              />
-              <Input
-                control={control}
-                error={errors.codeLanguage}
-                name="codeLanguage"
-                placeholder="typescript"
-                type="text"
-              />
-            </div>
-
-            <textarea
-              {...register('codeSnippet')}
-              className="w-full resize-none rounded-lg border border-[#d6d7db] bg-white p-3 font-mono text-[#494d56] text-sm placeholder:text-[#95989f] focus:outline-none"
-              placeholder="// tu código acá"
-              rows={6}
+        <div className="flex flex-col gap-2">
+          <div className="grid grid-cols-2 gap-2">
+            <Input
+              control={control}
+              error={errors.codeFilename}
+              name="codeFilename"
+              placeholder="archivo.ts"
+              type="text"
             />
+            <Input
+              control={control}
+              error={errors.codeLanguage}
+              name="codeLanguage"
+              placeholder="typescript"
+              type="text"
+            />
+          </div>
 
-            {errors.codeSnippet && (
-              <span className="font-medium text-red-400 text-sm">
-                {errors.codeSnippet.message}
-              </span>
-            )}
+          <textarea
+            {...register('codeSnippet')}
+            className="w-full resize-none rounded-lg border border-[#d6d7db] bg-white p-3 font-mono text-[#494d56] text-sm placeholder:text-[#95989f] focus:outline-none"
+            placeholder={
+              type === 'snippet'
+                ? '// tu código acá'
+                : '// código opcional (dejalo vacío si no aplica)'
+            }
+            rows={6}
+          />
+
+          {errors.codeSnippet && (
+            <span className="font-medium text-red-400 text-sm">
+              {errors.codeSnippet.message}
+            </span>
+          )}
+        </div>
+
+        <ImageUploadField
+          alt="captura adjunta"
+          fallback={
+            <span className="font-mono text-[#878992] text-xs">
+              Sin captura adjunta
+            </span>
+          }
+          height={160}
+          label="Agregar captura"
+          onChange={imageUpload.handleChange}
+          previewClassName="flex h-40 w-full items-center justify-center overflow-hidden rounded-lg border border-[#dfe1e5]"
+          uploading={imageUpload.uploading}
+          url={imageUpload.url}
+          width={320}
+        />
+
+        {imageUpload.error && (
+          <span className="font-medium text-red-400 text-sm">
+            {imageUpload.error}
+          </span>
+        )}
+
+        {imageUpload.url && (
+          <div className="flex justify-center">
+            <Button
+              onClick={handleRemoveImage}
+              type="button"
+              variant="secondary"
+            >
+              Quitar captura
+            </Button>
           </div>
         )}
 
