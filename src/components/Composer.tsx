@@ -7,12 +7,14 @@ import { useState, useTransition } from 'react';
 import { type SubmitHandler, useForm } from 'react-hook-form';
 import { createPost } from '@/actions/posts';
 import { type CreatePostInput, createPostSchema } from '@/schemas/post';
+import { useUserStore } from '@/store/user-store';
 import { POST_TYPE_LABELS, type PostType } from './TypePill';
 import { Button } from './ui/Button';
 import { CardWrapper } from './ui/CardWrapper';
 import { Input } from './ui/Input';
 
 export function Composer(): JSX.Element {
+  const user = useUserStore((s) => s.user);
   const {
     control,
     formState: { errors },
@@ -43,7 +45,12 @@ export function Composer(): JSX.Element {
           return;
         }
 
-        for (const [field, messages] of Object.entries(result.error)) {
+        const fieldErrors = (result.error ?? {}) as Record<
+          string,
+          string[] | undefined
+        >;
+
+        for (const [field, messages] of Object.entries(fieldErrors)) {
           if (messages && messages.length > 0) {
             setError(field as keyof CreatePostInput, { message: messages[0] });
           }
@@ -60,11 +67,12 @@ export function Composer(): JSX.Element {
       <form className="flex flex-col gap-3" onSubmit={handleSubmit(onSubmit)}>
         <div className="flex items-center gap-3">
           <Image
-            alt="avatar"
+            alt={`${user?.username ?? 'user'} avatar`}
             className="rounded-[10px]"
             height={36}
             loading="eager"
-            src="/tired-totoro.jpg"
+            src={user?.avatarUrl ?? '/tired-totoro.jpg'}
+            unoptimized
             width={42}
           />
 
