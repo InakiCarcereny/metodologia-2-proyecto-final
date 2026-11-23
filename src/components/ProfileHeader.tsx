@@ -94,7 +94,9 @@ export function ProfileHeader({
         <ProfileStats
           followersCount={profile.followersCount}
           followingCount={profile.followingCount}
+          isOwnProfile={isOwnProfile}
           postsCount={profile.postsCount}
+          username={profile.username}
         />
       </div>
     </CardWrapper>
