@@ -4,6 +4,7 @@ import { auth } from '@/auth';
 import { PostList } from '@/components/PostList';
 import { TagHeader } from '@/components/TagHeader';
 import { getTagCardByLabel, isFollowingTag } from '@/data/tag';
+import { getPostsByTagLabel } from '@/db/queries/posts';
 
 export default async function Tag({
   params,
@@ -14,9 +15,13 @@ export default async function Tag({
   if (!tag) notFound();
 
   const session = await auth();
-  const isFollowing = session?.user?.id
-    ? await isFollowingTag(session.user.id, tag.id)
-    : false;
+
+  const [posts, isFollowing] = await Promise.all([
+    getPostsByTagLabel(tag.label, { viewerId: session?.user?.id }),
+    session?.user?.id
+      ? isFollowingTag(session.user.id, tag.id)
+      : Promise.resolve(false),
+  ]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -26,7 +31,10 @@ export default async function Tag({
         tag={tag}
       />
 
-      <PostList emptyMessage="Todavía no hay posts con este tag." posts={[]} />
+      <PostList
+        emptyMessage="Todavía no hay posts con este tag."
+        posts={posts}
+      />
     </div>
   );
 }
