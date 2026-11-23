@@ -7,38 +7,14 @@ import {
   postLikes,
   postShares,
   posts,
-  type postTypes,
   profiles,
   users,
 } from '@/db/schema';
+import type { Post } from '@/types/post';
 
 export const FEED_PAGE_SIZE = 20;
 
 export type FeedTab = 'for-you' | 'following';
-
-export type FeedPost = {
-  author: {
-    avatarUrl: string | null;
-    username: string;
-  };
-  codeFilename: string | null;
-  codeLanguage: string | null;
-  codeSnippet: string | null;
-  content: string;
-  createdAt: Date;
-  id: string;
-  stats: {
-    comments: number;
-    likes: number;
-    reposts: number;
-  };
-  type: (typeof postTypes.enumValues)[number];
-  viewer: {
-    bookmarked: boolean;
-    liked: boolean;
-    reposted: boolean;
-  };
-};
 
 export async function getFeedPosts({
   limit = FEED_PAGE_SIZE,
@@ -50,11 +26,10 @@ export async function getFeedPosts({
   offset?: number;
   tab?: FeedTab;
   viewerId?: string;
-}): Promise<FeedPost[]> {
+}): Promise<Post[]> {
   let where: SQL | undefined;
 
   if (tab === 'following') {
-    // the following tab makes no sense without a logged-in viewer
     if (!viewerId) return [];
 
     const followedIds = db
@@ -62,7 +37,6 @@ export async function getFeedPosts({
       .from(followers)
       .where(eq(followers.idFollower, viewerId));
 
-    // posts from people you follow, plus your own (like X does)
     where = or(eq(posts.idUser, viewerId), inArray(posts.idUser, followedIds));
   }
 
@@ -75,6 +49,7 @@ export async function getFeedPosts({
       content: posts.content,
       createdAt: posts.createdAt,
       id: posts.id,
+      title: posts.title,
       type: posts.type,
       username: users.username,
     })
@@ -164,14 +139,14 @@ export async function getFeedPosts({
     codeFilename: row.codeFilename,
     codeLanguage: row.codeLanguage,
     codeSnippet: row.codeSnippet,
+    commentsCount: commentsById.get(row.id) ?? 0,
     content: row.content,
     createdAt: row.createdAt,
     id: row.id,
-    stats: {
-      comments: commentsById.get(row.id) ?? 0,
-      likes: likesById.get(row.id) ?? 0,
-      reposts: repostsById.get(row.id) ?? 0,
-    },
+    likesCount: likesById.get(row.id) ?? 0,
+    sharesCount: repostsById.get(row.id) ?? 0,
+    tags: [],
+    title: row.title,
     type: row.type,
     viewer: {
       bookmarked: bookmarkedIds.has(row.id),
