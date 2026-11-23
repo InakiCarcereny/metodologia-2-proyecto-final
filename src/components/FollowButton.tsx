@@ -34,7 +34,13 @@ export function FollowButton({
 
   return (
     <Button
-      className={cn('font-light', className)}
+      className={cn(
+        'font-light',
+        isFollowing
+          ? 'border-none bg-[#181c23] text-white hover:bg-[#303540]'
+          : 'text-black',
+        className,
+      )}
       disabled={isPending}
       onClick={handleClick}
       type="button"
