@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 
 interface PostCardFooterButtonProps {
   activeClassName: string;
-  count: number;
+  count?: number;
   fillIconWhenActive?: boolean;
   hoverClassName: string;
   icon: LucideIcon;
@@ -34,7 +34,7 @@ export function PostCardFooterButton({
         fill={isActive && fillIconWhenActive ? 'currentColor' : 'none'}
         size={14}
       />
-      {count}
+      {count !== undefined && count}
     </button>
   );
 }
