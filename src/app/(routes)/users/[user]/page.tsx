@@ -7,7 +7,7 @@ import { PostList } from '@/components/PostList';
 import { ProfileHeader } from '@/components/ProfileHeader';
 import { ProfileTabs } from '@/components/ProfileTabs';
 import { getConnectedRepos } from '@/data/github';
-import { getUserProfileByUsername } from '@/data/profile';
+import { getUserProfileByUsername, isFollowingUser } from '@/data/profile';
 import { getInferredStack } from '@/data/stack';
 
 export default async function User({
@@ -21,18 +21,26 @@ export default async function User({
   const session = await auth();
   if (session?.user?.id === profile.id) redirect('/profile');
 
-  const [stack, repos] = await Promise.all([
+  const [stack, repos, isFollowing] = await Promise.all([
     getInferredStack(profile.id),
     getConnectedRepos(profile.id),
+    session?.user?.id
+      ? isFollowingUser(session.user.id, profile.id)
+      : Promise.resolve(false),
   ]);
 
   return (
     <div className="flex flex-col gap-6">
-      <ProfileHeader isOwnProfile={false} profile={profile} />
+      <ProfileHeader
+        isFollowing={isFollowing}
+        isOwnProfile={false}
+        profile={profile}
+      />
 
       {(stack.length > 0 || repos.length > 0) && (
         <div className="grid grid-cols-2 gap-4">
           <InferredStackCard stack={stack} />
+
           <ConnectedReposCard repos={repos} />
         </div>
       )}

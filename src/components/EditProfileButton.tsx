@@ -9,7 +9,7 @@ export function EditProfileButton(): JSX.Element {
 
   return (
     <Button
-      className="w-32 font-light"
+      className="w-32 font-bold text-black"
       onClick={() => openModal('edit-profile')}
       type="button"
       variant="tertiary"

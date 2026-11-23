@@ -11,11 +11,13 @@ import type { UserProfile } from '@/types/user';
 import { formatDisplayName } from '@/utils/format-display-name';
 
 interface ProfileHeaderProps {
+  isFollowing?: boolean;
   isOwnProfile: boolean;
   profile: UserProfile;
 }
 
 export function ProfileHeader({
+  isFollowing = false,
   isOwnProfile,
   profile,
 }: ProfileHeaderProps): JSX.Element {
@@ -59,7 +61,11 @@ export function ProfileHeader({
           {isOwnProfile ? (
             <EditProfileButton />
           ) : (
-            <FollowButton className="w-32" />
+            <FollowButton
+              className="w-32"
+              initialIsFollowing={isFollowing}
+              userId={profile.id}
+            />
           )}
         </div>
 
