@@ -25,15 +25,7 @@ export function NavigationSideBar(): JSX.Element {
           <NavList />
         </nav>
 
-        <div className="flex flex-col gap-1">
-          <span className="pl-2.5 font-medium text-[#878992] text-[12px]">
-            TUS TAGS
-          </span>
-
-          <nav className="w-full">
-            <TagList />
-          </nav>
-        </div>
+        <TagList />
       </div>
 
       <div className="flex flex-col gap-2">
