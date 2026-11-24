@@ -11,36 +11,46 @@ import { formatRelativeTime } from '@/utils/format-relative-time';
 interface CommentItemProps {
   comment: CommentThread;
   idPost: string;
+  isReply?: boolean;
 }
 
 export function CommentItem({
   comment,
   idPost,
+  isReply = false,
 }: CommentItemProps): JSX.Element {
   const [replying, setReplying] = useState(false);
 
   return (
-    <li className="flex flex-col gap-2">
-      <div className="flex items-start gap-2">
+    <li
+      className={
+        isReply
+          ? 'flex flex-col gap-2 border-[#dfe1e5] border-l pl-4'
+          : 'flex flex-col gap-3 rounded-lg border border-[#dfe1e5] p-4'
+      }
+    >
+      <div className="flex items-start gap-3">
         <PostCardAvatar
           avatarUrl={comment.author.avatarUrl}
           username={comment.author.username}
         />
 
-        <div className="flex min-w-0 flex-col gap-1">
+        <div className="flex min-w-0 flex-1 flex-col gap-1">
           <div className="flex flex-wrap items-center gap-1">
-            <span className="font-bold text-[13px]">
+            <span className="font-bold text-[#171b22] text-[13px]">
               {formatDisplayName(comment.author.username)}
             </span>
+
             <span className="font-light text-[#7e8288] text-[12px]">
               @{comment.author.username}
             </span>
+
             <span className="font-light text-[#7e8288] text-[12px]">
               · {formatRelativeTime(comment.createdAt)}
             </span>
           </div>
 
-          <p className="font-sans text-[#494d56] text-[13px]">
+          <p className="whitespace-pre-wrap font-sans text-[#494d56] text-[13px] leading-relaxed">
             {comment.content}
           </p>
 
@@ -65,9 +75,14 @@ export function CommentItem({
       )}
 
       {comment.replies.length > 0 && (
-        <ul className="ml-11 flex flex-col gap-3 border-[#dfe1e5] border-l pl-4">
+        <ul className="ml-11 flex flex-col gap-3">
           {comment.replies.map((reply) => (
-            <CommentItem comment={reply} idPost={idPost} key={reply.id} />
+            <CommentItem
+              comment={reply}
+              idPost={idPost}
+              isReply
+              key={reply.id}
+            />
           ))}
         </ul>
       )}

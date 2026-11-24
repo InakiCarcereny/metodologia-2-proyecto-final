@@ -20,7 +20,7 @@ export function CommentList({
   }
 
   return (
-    <ul className="flex flex-col gap-4">
+    <ul className="flex flex-col gap-3">
       {threads.map((thread) => (
         <CommentItem comment={thread} idPost={idPost} key={thread.id} />
       ))}
