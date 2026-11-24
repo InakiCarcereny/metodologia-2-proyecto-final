@@ -27,13 +27,12 @@ export default async function PostPage({
       <PostCard detail linked={false} post={post} />
 
       <CardWrapper as="section" className="flex flex-col gap-4">
-        <h2 className="font-medium text-[#878992] text-[12px]">RESPONDER</h2>
+        <h2 className="font-bold text-[#171b22] text-lg">
+          {post.commentsCount}{' '}
+          {post.commentsCount === 1 ? 'comentario' : 'comentarios'}
+        </h2>
 
         <CommentForm idPost={post.id} />
-      </CardWrapper>
-
-      <CardWrapper as="section" className="flex flex-col gap-4">
-        <h2 className="font-medium text-[#878992] text-[12px]">COMENTARIOS</h2>
 
         <CommentList idPost={post.id} threads={threads} />
       </CardWrapper>
