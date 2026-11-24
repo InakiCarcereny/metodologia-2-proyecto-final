@@ -53,11 +53,27 @@
   "private": true,
   "scripts": {
     "build": "next build",
+    "ci": "pnpm lint && pnpm typecheck && pnpm test:coverage",
+    "db:check": "drizzle-kit check",
+    "db:drop": "drizzle-kit drop",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio",
     "dev": "next dev",
+    "docker:build": "docker build -t metodologia-2-proyecto-final .",
+    "docker:down": "docker compose down",
+    "docker:up": "docker compose up -d",
     "format": "biome format --write",
+    "format:check": "biome format",
     "lint": "biome check",
+    "lint:fix": "biome check --write",
     "prepare": "husky",
-    "start": "next start"
+    "start": "next start",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
   },
   "version": "0.1.0"
 }
