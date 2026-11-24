@@ -9,7 +9,7 @@ interface PostCardFooterButtonProps {
   hoverClassName: string;
   icon: LucideIcon;
   isActive?: boolean;
-  onClick: (event: MouseEvent<HTMLButtonElement>) => void;
+  onClick?: (event: MouseEvent<HTMLButtonElement>) => void;
 }
 
 export function PostCardFooterButton({

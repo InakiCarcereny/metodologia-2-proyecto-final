@@ -24,7 +24,7 @@ export default async function PostPage({
 
   return (
     <div className="flex flex-col gap-6">
-      <PostCard post={post} />
+      <PostCard linked={false} post={post} />
 
       <CardWrapper as="section" className="flex flex-col gap-4">
         <h2 className="font-medium text-[#878992] text-[12px]">RESPONDER</h2>
