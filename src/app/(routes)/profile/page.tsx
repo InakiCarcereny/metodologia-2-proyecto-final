@@ -11,6 +11,7 @@ import { ProfileTabs } from '@/components/ProfileTabs';
 import { getConnectedRepos, hasGitHubAccount } from '@/data/github';
 import { getUserProfileById } from '@/data/profile';
 import { getInferredStack } from '@/data/stack';
+import { getUserPosts, getUserReposts } from '@/db/queries/posts';
 
 export default async function Profile({
   searchParams,
@@ -21,12 +22,15 @@ export default async function Profile({
   const profile = await getUserProfileById(session.user.id);
   if (!profile) redirect('/login');
 
-  const [stack, repos, isGitHubConnected, params] = await Promise.all([
-    getInferredStack(profile.id),
-    getConnectedRepos(profile.id),
-    hasGitHubAccount(profile.id),
-    searchParams,
-  ]);
+  const [stack, repos, isGitHubConnected, params, userPosts, userReposts] =
+    await Promise.all([
+      getInferredStack(profile.id),
+      getConnectedRepos(profile.id),
+      hasGitHubAccount(profile.id),
+      searchParams,
+      getUserPosts({ idUser: profile.id, viewerId: session.user.id }),
+      getUserReposts({ idUser: profile.id, viewerId: session.user.id }),
+    ]);
 
   const githubLinked = params.githubLinked === '1';
   const githubError =
@@ -51,11 +55,14 @@ export default async function Profile({
         postsSlot={
           <PostList
             emptyMessage="Todavía no hay posts para mostrar."
-            posts={[]}
+            posts={userPosts}
           />
         }
         repostsSlot={
-          <PostList emptyMessage="Todavía no hizo reposts." posts={[]} />
+          <PostList
+            emptyMessage="Todavía no hizo reposts."
+            posts={userReposts}
+          />
         }
       />
     </div>

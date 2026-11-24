@@ -12,6 +12,7 @@ export interface Post {
   content: string;
   createdAt: Date;
   id: string;
+  imageUrl: string | null;
   isOwnPost: boolean;
   isPinned?: boolean;
   likesCount: number;
@@ -20,4 +21,5 @@ export interface Post {
   tags: Pick<Tag, 'id' | 'label'>[];
   title: string;
   type: PostType;
+  viewer?: { bookmarked: boolean; liked: boolean; reposted: boolean };
 }
