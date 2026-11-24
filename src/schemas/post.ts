@@ -34,6 +34,11 @@ export const createPostSchema = z
       )
       .max(5, 'Máximo 5 tags')
       .optional(),
+    title: z
+      .string('Título requerido')
+      .trim()
+      .min(1, 'El título no puede estar vacío')
+      .max(200, 'Máximo 200 caracteres'),
     type: z.enum(postTypes.enumValues, 'Tipo de post inválido'),
   })
   .superRefine((data, ctx) => {
