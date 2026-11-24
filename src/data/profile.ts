@@ -1,7 +1,16 @@
-import { and, count, eq, ne, notInArray, type SQL, sql } from 'drizzle-orm';
+import {
+  and,
+  count,
+  desc,
+  eq,
+  ne,
+  notInArray,
+  type SQL,
+  sql,
+} from 'drizzle-orm';
 import { db } from '@/db';
 import { followers, posts, profiles, users } from '@/db/schema';
-import type { UserCardData, UserProfile } from '@/types/user';
+import type { UserCardData, UserListItem, UserProfile } from '@/types/user';
 
 async function countPostsByUser(idUser: string): Promise<number> {
   const [row] = await db
@@ -43,6 +52,92 @@ export async function isFollowingUser(
     .limit(1);
 
   return Boolean(row);
+}
+
+async function getFollowingIds(idFollower: string): Promise<Set<string>> {
+  const rows = await db
+    .select({ idUser: followers.idUser })
+    .from(followers)
+    .where(eq(followers.idFollower, idFollower));
+
+  return new Set(rows.map((row) => row.idUser));
+}
+
+async function getFollowerIds(idUser: string): Promise<Set<string>> {
+  const rows = await db
+    .select({ idFollower: followers.idFollower })
+    .from(followers)
+    .where(eq(followers.idUser, idUser));
+
+  return new Set(rows.map((row) => row.idFollower));
+}
+
+function withViewerRelations(
+  rows: Pick<UserListItem, 'avatarUrl' | 'bio' | 'id' | 'username'>[],
+  viewerFollowingIds: Set<string>,
+  viewerFollowerIds: Set<string>,
+): UserListItem[] {
+  return rows.map((row) => ({
+    ...row,
+    followsViewer: viewerFollowerIds.has(row.id),
+    isFollowing: viewerFollowingIds.has(row.id),
+  }));
+}
+
+export async function getFollowers(
+  idUser: string,
+  viewerId?: string,
+): Promise<UserListItem[]> {
+  try {
+    const rows = await db
+      .select({
+        avatarUrl: profiles.avatarUrl,
+        bio: profiles.bio,
+        id: users.id,
+        username: users.username,
+      })
+      .from(followers)
+      .innerJoin(users, eq(users.id, followers.idFollower))
+      .leftJoin(profiles, eq(profiles.id, users.id))
+      .where(eq(followers.idUser, idUser))
+      .orderBy(desc(followers.createdAt));
+
+    const [viewerFollowingIds, viewerFollowerIds] = viewerId
+      ? await Promise.all([getFollowingIds(viewerId), getFollowerIds(viewerId)])
+      : [new Set<string>(), new Set<string>()];
+
+    return withViewerRelations(rows, viewerFollowingIds, viewerFollowerIds);
+  } catch {
+    return [];
+  }
+}
+
+export async function getFollowing(
+  idFollower: string,
+  viewerId?: string,
+): Promise<UserListItem[]> {
+  try {
+    const rows = await db
+      .select({
+        avatarUrl: profiles.avatarUrl,
+        bio: profiles.bio,
+        id: users.id,
+        username: users.username,
+      })
+      .from(followers)
+      .innerJoin(users, eq(users.id, followers.idUser))
+      .leftJoin(profiles, eq(profiles.id, users.id))
+      .where(eq(followers.idFollower, idFollower))
+      .orderBy(desc(followers.createdAt));
+
+    const [viewerFollowingIds, viewerFollowerIds] = viewerId
+      ? await Promise.all([getFollowingIds(viewerId), getFollowerIds(viewerId)])
+      : [new Set<string>(), new Set<string>()];
+
+    return withViewerRelations(rows, viewerFollowingIds, viewerFollowerIds);
+  } catch {
+    return [];
+  }
 }
 
 async function getUserProfile(

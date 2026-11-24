@@ -15,3 +15,11 @@ export type UserCardData = Pick<
   UserProfile,
   'id' | 'username' | 'avatarUrl' | 'postsCount' | 'followersCount'
 >;
+
+export type UserListItem = Pick<
+  UserProfile,
+  'id' | 'username' | 'avatarUrl' | 'bio'
+> & {
+  followsViewer: boolean;
+  isFollowing: boolean;
+};

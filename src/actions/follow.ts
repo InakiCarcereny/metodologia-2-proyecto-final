@@ -24,7 +24,7 @@ export async function followUser(targetUserId: string): Promise<ActionResult> {
     .values({ idFollower: session.user.id, idUser: targetUserId })
     .onConflictDoNothing();
 
-  revalidatePath('/home');
+  revalidatePath('/', 'layout');
 
   return { success: true };
 }
@@ -44,7 +44,27 @@ export async function unfollowUser(
       ),
     );
 
-  revalidatePath('/home');
+  revalidatePath('/', 'layout');
+
+  return { success: true };
+}
+
+export async function removeFollower(
+  followerId: string,
+): Promise<ActionResult> {
+  const session = await auth();
+  if (!session?.user?.id) return { error: 'No autenticado' };
+
+  await db
+    .delete(followers)
+    .where(
+      and(
+        eq(followers.idFollower, followerId),
+        eq(followers.idUser, session.user.id),
+      ),
+    );
+
+  revalidatePath('/', 'layout');
 
   return { success: true };
 }
