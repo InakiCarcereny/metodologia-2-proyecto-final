@@ -11,11 +11,16 @@ import type { Post } from '@/types/post';
 import { formatDisplayName } from '@/utils/format-display-name';
 
 interface PostCardProps {
+  detail?: boolean;
   linked?: boolean;
   post: Post;
 }
 
-export function PostCard({ linked = true, post }: PostCardProps): JSX.Element {
+export function PostCard({
+  detail = false,
+  linked = true,
+  post,
+}: PostCardProps): JSX.Element {
   const hasCode = post.type === 'snippet' && Boolean(post.codeSnippet);
 
   const body: ReactNode = (
@@ -27,9 +32,15 @@ export function PostCard({ linked = true, post }: PostCardProps): JSX.Element {
         </p>
       )}
 
-      <PostCardHeader post={post} />
+      <PostCardHeader detail={detail} post={post} />
 
-      <p className="whitespace-pre-wrap font-sans text-[#494d56] text-[13px] leading-[1.5]">
+      {detail && (
+        <h1 className="font-bold text-2xl text-[#171b22] leading-tight">
+          {post.title}
+        </h1>
+      )}
+
+      <p className="whitespace-pre-wrap font-sans text-[#494d56] text-[13px] leading-[1.6]">
         {post.content}
       </p>
 
