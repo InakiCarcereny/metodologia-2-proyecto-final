@@ -103,7 +103,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Push schema
-        run: pnpm db:push -- --force
+        run: pnpm exec drizzle-kit push --force
         env:
           DATABASE_URL: postgres://postgres:${{ secrets.CI_DB_PASSWORD }}@localhost:5432/mi_app
 
