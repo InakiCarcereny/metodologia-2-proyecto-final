@@ -1,5 +1,6 @@
 export const privateRoutes = [
   '/home',
+  '/posts',
   '/explore',
   '/bookmarks',
   '/profile',

@@ -10,7 +10,7 @@ export function PublishModal(): JSX.Element {
 
   return (
     <Modal title="Publicar">
-      <Composer onPublished={closeModal} />
+      <Composer onPublished={closeModal} showCancel={false} />
     </Modal>
   );
 }

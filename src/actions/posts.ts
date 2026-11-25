@@ -39,10 +39,9 @@ export async function createPost(input: CreatePostInput) {
     content,
     imageUrl,
     tags: tagLabels,
+    title,
     type,
   } = parsed.data;
-
-  const title = content.split('\n')[0].slice(0, 80) || type;
 
   const idUser = session.user.id;
 

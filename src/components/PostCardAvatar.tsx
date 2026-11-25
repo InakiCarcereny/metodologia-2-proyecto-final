@@ -1,6 +1,5 @@
-import { User } from 'lucide-react';
-import Image from 'next/image';
 import type { JSX } from 'react';
+import { UserAvatar } from '@/components/UserAvatar';
 
 interface PostCardAvatarProps {
   avatarUrl: string | null;
@@ -11,21 +10,13 @@ export function PostCardAvatar({
   avatarUrl,
   username,
 }: PostCardAvatarProps): JSX.Element {
-  if (avatarUrl) {
-    return (
-      <Image
-        alt={`${username} avatar`}
-        className="h-9 w-9 shrink-0 rounded-[10px] object-cover"
-        height={36}
-        src={avatarUrl}
-        width={36}
-      />
-    );
-  }
-
   return (
-    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-zinc-200">
-      <User color="white" size={20} />
-    </span>
+    <UserAvatar
+      avatarUrl={avatarUrl}
+      className="h-9 w-9"
+      iconSize={20}
+      imageSize={36}
+      username={username}
+    />
   );
 }

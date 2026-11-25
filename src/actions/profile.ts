@@ -3,14 +3,14 @@
 import { eq } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { auth } from '@/auth';
-import { getUserProfileById } from '@/data/profile';
+import { getFollowers, getFollowing, getUserProfileById } from '@/data/profile';
 import { db } from '@/db';
 import { profiles } from '@/db/schema';
 import {
   type EditProfileFormValues,
   editProfileSchema,
 } from '@/schemas/profile';
-import type { UserProfile } from '@/types/user';
+import type { UserListItem, UserProfile } from '@/types/user';
 
 interface ActionResult {
   error?: string;
@@ -22,6 +22,22 @@ export async function getMyProfile(): Promise<UserProfile | null> {
   if (!session?.user?.id) return null;
 
   return getUserProfileById(session.user.id);
+}
+
+export async function getFollowersList(
+  userId: string,
+): Promise<UserListItem[]> {
+  const session = await auth();
+
+  return getFollowers(userId, session?.user?.id);
+}
+
+export async function getFollowingList(
+  userId: string,
+): Promise<UserListItem[]> {
+  const session = await auth();
+
+  return getFollowing(userId, session?.user?.id);
 }
 
 export async function updateProfile(
