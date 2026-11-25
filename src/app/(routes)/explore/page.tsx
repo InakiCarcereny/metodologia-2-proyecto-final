@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import type { JSX } from 'react';
 import { auth } from '@/auth';
-import { ExploreFilters } from '@/components/ExploreFilters';
+import { ExploreSearch } from '@/components/ExploreSearch';
 import { ExploreUserCard } from '@/components/ExploreUserCard';
 import { PostCard } from '@/components/PostCard';
 import { TagFollowButton } from '@/components/TagFollowButton';
@@ -12,7 +12,7 @@ import { getFeedPosts } from '@/db/queries/posts';
 import type { PostType } from '@/types/post';
 
 interface ExplorePageProps {
-  searchParams: Promise<{ type?: string }>;
+  searchParams: Promise<{ q?: string; type?: string }>;
 }
 
 function getPostType(value: string | undefined): PostType | undefined {
@@ -40,6 +40,7 @@ export default async function Explore({
     getTrendingTags(4),
     getExploreUsersToFollow(userId, 4),
     getFeedPosts({
+      query: params.q,
       type: activeType,
       viewerId: userId,
     }),
@@ -61,9 +62,7 @@ export default async function Explore({
       <header>
         <h1 className="font-bold text-3xl text-[#171b22]">Explorar</h1>
       </header>
-
-      <ExploreFilters activeType={activeType} />
-
+      <ExploreSearch />
       <section className="flex flex-col gap-3">
         <h2 className="font-medium text-[#878992] text-[12px]">
           TAGS PARA SEGUIR
