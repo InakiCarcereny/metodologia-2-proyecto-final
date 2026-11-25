@@ -1,6 +1,6 @@
 import { and, count, desc, eq } from 'drizzle-orm';
 import { db } from '@/db';
-import { tags, userTagFollows } from '@/db/schema';
+import { postTags, tags, userTagFollows } from '@/db/schema';
 import type { Tag, TagCardData } from '@/types/tag';
 
 export async function countTagFollowers(idTag: string): Promise<number> {
@@ -8,6 +8,15 @@ export async function countTagFollowers(idTag: string): Promise<number> {
     .select({ value: count() })
     .from(userTagFollows)
     .where(eq(userTagFollows.idTag, idTag));
+
+  return row?.value ?? 0;
+}
+
+export async function countTagPosts(idTag: string): Promise<number> {
+  const [row] = await db
+    .select({ value: count() })
+    .from(postTags)
+    .where(eq(postTags.idTag, idTag));
 
   return row?.value ?? 0;
 }
@@ -44,14 +53,17 @@ export async function getTagCardByLabel(
     const tag = await getTagByLabel(label);
     if (!tag) return null;
 
-    const followersCount = await countTagFollowers(tag.id);
+    const [followersCount, postsCount] = await Promise.all([
+      countTagFollowers(tag.id),
+      countTagPosts(tag.id),
+    ]);
 
     return {
       description: tag.description,
       followersCount,
       id: tag.id,
       label: tag.label,
-      postsCount: 0,
+      postsCount,
     };
   } catch {
     return null;

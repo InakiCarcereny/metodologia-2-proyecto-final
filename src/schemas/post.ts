@@ -28,6 +28,12 @@ export const createPostSchema = z
       .trim()
       .url('URL de imagen inválida')
       .optional(),
+    tags: z
+      .array(
+        z.string('Tag inválido').trim().min(1).max(30, 'Máximo 30 caracteres'),
+      )
+      .max(5, 'Máximo 5 tags')
+      .optional(),
     type: z.enum(postTypes.enumValues, 'Tipo de post inválido'),
   })
   .superRefine((data, ctx) => {
