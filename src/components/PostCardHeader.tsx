@@ -2,26 +2,15 @@ import { MoreHorizontal } from 'lucide-react';
 import type { JSX } from 'react';
 import { PostCardAvatar } from '@/components/PostCardAvatar';
 import { cn } from '@/lib/utils';
-import type { Post, PostType } from '@/types/post';
+import type { Post } from '@/types/post';
 import { formatDisplayName } from '@/utils/format-display-name';
 import { formatRelativeTime } from '@/utils/format-relative-time';
+import { POST_TYPE_LABELS, POST_TYPE_STYLES } from '@/utils/post-type';
 
 interface PostCardHeaderProps {
   detail?: boolean;
   post: Post;
 }
-
-const POST_TYPE_LABELS: Record<PostType, string> = {
-  article: 'artículo',
-  question: 'pregunta',
-  snippet: 'snippet',
-};
-
-const POST_TYPE_STYLES: Record<PostType, string> = {
-  article: 'bg-[#eaf1fd] text-[#3b6fd4]',
-  question: 'bg-[#f3ecfb] text-[#8a4fd1]',
-  snippet: 'bg-[#fdecea] text-[#c0392b]',
-};
 
 export function PostCardHeader({
   detail = false,
