@@ -3,8 +3,8 @@ import type { JSX } from 'react';
 import { auth } from '@/auth';
 import { PostList } from '@/components/PostList';
 import { TagHeader } from '@/components/TagHeader';
+import { getPostsByTagLabel } from '@/data/post';
 import { getTagCardByLabel, isFollowingTag } from '@/data/tag';
-import { getPostsByTagLabel } from '@/db/queries/posts';
 
 export default async function Tag({
   params,

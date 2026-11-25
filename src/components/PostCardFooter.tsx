@@ -2,9 +2,8 @@
 
 import { Bookmark, Heart, MessageCircle, Repeat2 } from 'lucide-react';
 import type { JSX, MouseEvent } from 'react';
-import { useState, useTransition } from 'react';
-import { repostPost, toggleBookmark, toggleLike } from '@/actions/posts';
 import { PostCardFooterButton } from '@/components/PostCardFooterButton';
+import { usePostInteractions } from '@/hooks/usePostInteractions';
 import type { Post } from '@/types/post';
 
 interface PostCardFooterProps {
@@ -12,69 +11,36 @@ interface PostCardFooterProps {
 }
 
 export function PostCardFooter({ post }: PostCardFooterProps): JSX.Element {
-  const [isPending, startTransition] = useTransition();
-  const [state, setState] = useState({
-    bookmarked: post.viewer?.bookmarked ?? false,
-    comments: post.commentsCount,
-    liked: post.viewer?.liked ?? false,
-    likes: post.likesCount,
-    reposted: post.viewer?.reposted ?? false,
-    reposts: post.sharesCount,
-  });
+  const { state, toggleBookmark, toggleLike, toggleRepost } =
+    usePostInteractions({
+      idPost: post.id,
+      initial: {
+        bookmarked: post.viewer?.bookmarked ?? false,
+        comments: post.commentsCount,
+        liked: post.viewer?.liked ?? false,
+        likes: post.likesCount,
+        reposted: post.viewer?.reposted ?? false,
+        reposts: post.sharesCount,
+      },
+    });
 
-  function handleLike(event: MouseEvent<HTMLButtonElement>): void {
+  const handleLike = (event: MouseEvent<HTMLButtonElement>): void => {
+    event.preventDefault();
     event.stopPropagation();
-    if (isPending) return;
+    toggleLike();
+  };
 
-    const snapshot = state;
-    const liked = !state.liked;
-    setState({ ...state, liked, likes: state.likes + (liked ? 1 : -1) });
-
-    startTransition(async () => {
-      const result = await toggleLike({ idPost: post.id });
-
-      if ('error' in result) {
-        setState(snapshot);
-      }
-    });
-  }
-
-  function handleRepost(event: MouseEvent<HTMLButtonElement>): void {
+  const handleRepost = (event: MouseEvent<HTMLButtonElement>): void => {
+    event.preventDefault();
     event.stopPropagation();
-    if (isPending) return;
+    toggleRepost();
+  };
 
-    const snapshot = state;
-    const reposted = !state.reposted;
-    setState({
-      ...state,
-      reposted,
-      reposts: state.reposts + (reposted ? 1 : -1),
-    });
-
-    startTransition(async () => {
-      const result = await repostPost({ idPost: post.id });
-
-      if ('error' in result) {
-        setState(snapshot);
-      }
-    });
-  }
-
-  function handleBookmark(event: MouseEvent<HTMLButtonElement>): void {
+  const handleBookmark = (event: MouseEvent<HTMLButtonElement>): void => {
+    event.preventDefault();
     event.stopPropagation();
-    if (isPending) return;
-
-    const snapshot = state;
-    setState({ ...state, bookmarked: !state.bookmarked });
-
-    startTransition(async () => {
-      const result = await toggleBookmark({ idPost: post.id });
-
-      if ('error' in result) {
-        setState(snapshot);
-      }
-    });
-  }
+    toggleBookmark();
+  };
 
   return (
     <footer className="flex items-center justify-between text-xs">

@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import type { JSX, KeyboardEvent } from 'react';
-import type { FeedTab } from '@/db/queries/posts';
+import type { FeedTab } from '@/data/post';
 import { cn } from '@/lib/utils';
 
 const TABS = [
@@ -13,17 +13,20 @@ const TABS = [
 export function FeedTabs({ activeTab }: { activeTab: FeedTab }): JSX.Element {
   const router = useRouter();
 
-  function goToTab(tab: FeedTab) {
+  const goToTab = (tab: FeedTab): void => {
     router.push(`/home?tab=${tab}`);
-  }
+  };
 
-  function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return;
+
     event.preventDefault();
+
     const index = TABS.findIndex((tab) => tab.value === activeTab);
     const next = event.key === 'ArrowRight' ? index + 1 : index - 1;
+
     goToTab(TABS[(next + TABS.length) % TABS.length].value);
-  }
+  };
 
   return (
     <div className="flex gap-6" onKeyDown={handleKeyDown} role="tablist">
