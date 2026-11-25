@@ -1,4 +1,5 @@
 import { and, countDistinct, desc, eq, ilike, ne, or } from 'drizzle-orm';
+import { alias } from 'drizzle-orm/pg-core';
 import { db } from '@/db';
 import {
   followers,
@@ -15,6 +16,7 @@ export interface ExploreUserResult {
   bio: string | null;
   followersCount: number;
   id: string;
+  isFollowing: boolean;
   username: string;
 }
 
@@ -27,17 +29,27 @@ export async function searchExploreUsers(
 
   if (!query.trim()) return [];
 
-  return db
+  const following = alias(followers, 'following');
+
+  const rows = await db
     .select({
       avatarUrl: profiles.avatarUrl,
       bio: profiles.bio,
       followersCount: countDistinct(followers.idFollower).mapWith(Number),
+      followingId: following.idUser,
       id: users.id,
       username: users.username,
     })
     .from(users)
     .leftJoin(profiles, eq(profiles.id, users.id))
     .leftJoin(followers, eq(followers.idUser, users.id))
+    .leftJoin(
+      following,
+      and(
+        eq(following.idFollower, currentUserId),
+        eq(following.idUser, users.id),
+      ),
+    )
     .where(
       and(
         ne(users.id, currentUserId),
@@ -53,9 +65,15 @@ export async function searchExploreUsers(
       users.createdAt,
       profiles.avatarUrl,
       profiles.bio,
+      following.idUser,
     )
     .orderBy(desc(countDistinct(followers.idFollower)))
     .limit(limit);
+
+  return rows.map(({ followingId, ...user }) => ({
+    ...user,
+    isFollowing: Boolean(followingId),
+  }));
 }
 
 export async function searchExploreTags(
