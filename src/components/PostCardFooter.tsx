@@ -84,7 +84,6 @@ export function PostCardFooter({ post }: PostCardFooterProps): JSX.Element {
           count={state.comments}
           hoverClassName="hover:bg-[#eaf1fd] hover:text-[#3b6fd4]"
           icon={MessageCircle}
-          onClick={(event) => event.stopPropagation()}
         />
 
         <PostCardFooterButton

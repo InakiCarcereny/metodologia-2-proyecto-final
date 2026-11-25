@@ -270,3 +270,20 @@ export async function getPostsByTagLabel(
 
   return buildPosts(rows, viewerId);
 }
+
+export async function getPostById(
+  id: string,
+  { viewerId }: { viewerId?: string } = {},
+): Promise<Post | null> {
+  const rows = await db
+    .select(POST_COLUMNS)
+    .from(posts)
+    .innerJoin(users, eq(users.id, posts.idUser))
+    .leftJoin(profiles, eq(profiles.id, users.id))
+    .where(eq(posts.id, id))
+    .limit(1);
+
+  const [post] = await buildPosts(rows, viewerId);
+
+  return post ?? null;
+}
