@@ -166,14 +166,17 @@ export async function getFeedPosts({
   limit = FEED_PAGE_SIZE,
   offset = 0,
   tab = 'for-you',
+  type,
   viewerId,
 }: {
   limit?: number;
   offset?: number;
   tab?: FeedTab;
+  type?: PostType;
+
   viewerId?: string;
 }): Promise<Post[]> {
-  let where: SQL | undefined;
+  const conditions: SQL[] = [];
 
   if (tab === 'following') {
     if (!viewerId) return [];
@@ -183,8 +186,21 @@ export async function getFeedPosts({
       .from(followers)
       .where(eq(followers.idFollower, viewerId));
 
-    where = or(eq(posts.idUser, viewerId), inArray(posts.idUser, followedIds));
+    const followingCondition = or(
+      eq(posts.idUser, viewerId),
+      inArray(posts.idUser, followedIds),
+    );
+
+    if (followingCondition) {
+      conditions.push(followingCondition);
+    }
   }
+
+  if (type) {
+    conditions.push(eq(posts.type, type));
+  }
+
+  const where = conditions.length > 0 ? and(...conditions) : undefined;
 
   const rows = await db
     .select(POST_COLUMNS)
