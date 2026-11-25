@@ -1,6 +1,6 @@
 import type { JSX } from 'react';
 import { CommentItem } from '@/components/CommentItem';
-import type { CommentThread } from '@/db/queries/comments';
+import type { CommentThread } from '@/data/comment';
 
 interface CommentListProps {
   idPost: string;

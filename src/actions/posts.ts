@@ -3,6 +3,7 @@
 import { and, eq, inArray } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { auth } from '@/auth';
+import { FEED_PAGE_SIZE, type FeedTab, getFeedPosts } from '@/data/post';
 import { db } from '@/db';
 import {
   bookmarks,
@@ -18,6 +19,7 @@ import {
   type PostInteractionInput,
   postInteractionSchema,
 } from '@/schemas/post';
+import type { Post } from '@/types/post';
 
 export async function createPost(input: CreatePostInput) {
   const session = await auth();
@@ -101,7 +103,17 @@ export async function createPost(input: CreatePostInput) {
   }
 }
 
-export async function toggleLike(input: PostInteractionInput) {
+type InteractionTable = typeof bookmarks | typeof postLikes | typeof postShares;
+
+async function toggleInteraction({
+  errorMessage,
+  input,
+  table,
+}: {
+  errorMessage: string;
+  input: PostInteractionInput;
+  table: InteractionTable;
+}): Promise<{ active: boolean } | { error: string }> {
   const session = await auth();
 
   if (!session?.user?.id) {
@@ -119,103 +131,80 @@ export async function toggleLike(input: PostInteractionInput) {
 
   try {
     const inserted = await db
-      .insert(postLikes)
+      .insert(table)
       .values({ idPost, idUser })
       .onConflictDoNothing()
       .returning();
 
-    let liked = true;
+    let active = true;
 
     if (inserted.length === 0) {
       await db
-        .delete(postLikes)
-        .where(and(eq(postLikes.idPost, idPost), eq(postLikes.idUser, idUser)));
-      liked = false;
+        .delete(table)
+        .where(and(eq(table.idPost, idPost), eq(table.idUser, idUser)));
+      active = false;
     }
 
     revalidatePath('/home');
-    return { liked };
+    revalidatePath(`/posts/${idPost}`);
+
+    return { active };
   } catch {
-    return { error: 'No se pudo procesar el like' };
+    return { error: errorMessage };
   }
+}
+
+export async function toggleLike(input: PostInteractionInput) {
+  const result = await toggleInteraction({
+    errorMessage: 'No se pudo procesar el like',
+    input,
+    table: postLikes,
+  });
+
+  if ('error' in result) return result;
+  return { liked: result.active };
 }
 
 export async function toggleBookmark(input: PostInteractionInput) {
-  const session = await auth();
+  const result = await toggleInteraction({
+    errorMessage: 'No se pudo guardar el post',
+    input,
+    table: bookmarks,
+  });
 
-  if (!session?.user?.id) {
-    return { error: 'No autenticado' };
-  }
-
-  const parsed = postInteractionSchema.safeParse(input);
-
-  if (!parsed.success) {
-    return { error: 'ID de post inválido' };
-  }
-
-  const { idPost } = parsed.data;
-  const idUser = session.user.id;
-
-  try {
-    const inserted = await db
-      .insert(bookmarks)
-      .values({ idPost, idUser })
-      .onConflictDoNothing()
-      .returning();
-
-    let bookmarked = true;
-
-    if (inserted.length === 0) {
-      await db
-        .delete(bookmarks)
-        .where(and(eq(bookmarks.idPost, idPost), eq(bookmarks.idUser, idUser)));
-      bookmarked = false;
-    }
-
-    revalidatePath('/home');
-    return { bookmarked };
-  } catch {
-    return { error: 'No se pudo guardar el post' };
-  }
+  if ('error' in result) return result;
+  return { bookmarked: result.active };
 }
 
 export async function repostPost(input: PostInteractionInput) {
-  const session = await auth();
+  const result = await toggleInteraction({
+    errorMessage: 'No se pudo repostear',
+    input,
+    table: postShares,
+  });
 
-  if (!session?.user?.id) {
-    return { error: 'No autenticado' };
-  }
+  if ('error' in result) return result;
+  return { reposted: result.active };
+}
 
-  const parsed = postInteractionSchema.safeParse(input);
-
-  if (!parsed.success) {
-    return { error: 'ID de post inválido' };
-  }
-
-  const { idPost } = parsed.data;
-  const idUser = session.user.id;
-
+export async function fetchMoreFeedPosts({
+  offset,
+  tab,
+}: {
+  offset: number;
+  tab: FeedTab;
+}): Promise<{ hasMore: boolean; posts: Post[] } | { error: string }> {
   try {
-    const inserted = await db
-      .insert(postShares)
-      .values({ idPost, idUser })
-      .onConflictDoNothing()
-      .returning();
+    const session = await auth();
 
-    let reposted = true;
+    const morePosts = await getFeedPosts({
+      offset,
+      tab,
+      viewerId: session?.user?.id,
+    });
 
-    if (inserted.length === 0) {
-      await db
-        .delete(postShares)
-        .where(
-          and(eq(postShares.idPost, idPost), eq(postShares.idUser, idUser)),
-        );
-      reposted = false;
-    }
-
-    revalidatePath('/home');
-    return { reposted };
+    return { hasMore: morePosts.length === FEED_PAGE_SIZE, posts: morePosts };
   } catch {
-    return { error: 'No se pudo repostear' };
+    return { error: 'No se pudieron cargar más posts' };
   }
 }

@@ -1,10 +1,17 @@
 'use client';
 
-import type { FormEvent, JSX } from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import type { JSX } from 'react';
 import { useState, useTransition } from 'react';
+import { type SubmitHandler, useForm } from 'react-hook-form';
 import { createComment } from '@/actions/comments';
 import { PostCardAvatar } from '@/components/PostCardAvatar';
 import { Button } from '@/components/ui/Button';
+import { Textarea } from '@/components/ui/Textarea';
+import {
+  type CreateCommentInput,
+  createCommentSchema,
+} from '@/schemas/comment';
 import { useUserStore } from '@/store/user-store';
 
 interface CommentFormProps {
@@ -18,57 +25,76 @@ export function CommentForm({
   idPost,
   onDone,
 }: CommentFormProps): JSX.Element {
-  const user = useUserStore((state) => state.user);
-  const [content, setContent] = useState('');
-  const [error, setError] = useState<string>();
   const [isPending, startTransition] = useTransition();
+  const [serverError, setServerError] = useState<string>();
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>): void {
-    event.preventDefault();
-    setError(undefined);
+  const user = useUserStore((state) => state.user);
 
-    if (content.trim().length === 0) {
-      setError('El comentario no puede estar vacío');
-      return;
-    }
+  const {
+    control,
+    formState: { errors },
+    handleSubmit,
+    reset,
+    setError,
+  } = useForm<CreateCommentInput>({
+    defaultValues: {
+      content: '',
+      idParent,
+      idPost,
+    },
+    resolver: zodResolver(createCommentSchema),
+  });
+
+  const onSubmit: SubmitHandler<CreateCommentInput> = async (data) => {
+    setServerError(undefined);
 
     startTransition(async () => {
-      const result = await createComment({
-        content,
-        idParent,
-        idPost,
-      });
+      const result = await createComment(data);
 
       if ('error' in result) {
-        setError(
-          typeof result.error === 'string'
-            ? result.error
-            : 'Revisá los campos del comentario',
-        );
+        if (typeof result.error === 'string') {
+          setServerError(result.error);
+          return;
+        }
+
+        const fieldErrors = (result.error ?? {}) as Record<
+          string,
+          string[] | undefined
+        >;
+
+        for (const [field, messages] of Object.entries(fieldErrors)) {
+          if (messages && messages.length > 0) {
+            setError(field as keyof CreateCommentInput, {
+              message: messages[0],
+            });
+          }
+        }
+
         return;
       }
 
-      setContent('');
+      reset({ content: '', idParent, idPost });
       onDone?.();
     });
-  }
+  };
 
   return (
-    <form className="flex flex-col gap-2" onSubmit={handleSubmit}>
+    <form className="flex flex-col gap-2" onSubmit={handleSubmit(onSubmit)}>
       <div className="flex items-center gap-3">
         <PostCardAvatar
           avatarUrl={user?.avatarUrl ?? null}
           username={user?.username ?? 'user'}
         />
 
-        <textarea
-          className="min-h-10 flex-1 resize-none rounded-lg border border-[#d6d7db] bg-white p-3 text-[#494d56] text-sm placeholder:text-[#95989f] focus:outline-none"
-          onChange={(event) => setContent(event.target.value)}
+        <Textarea
+          className="min-h-10 flex-1 text-[#494d56] text-sm"
+          control={control}
+          error={errors.content}
+          name="content"
           placeholder={
             idParent ? 'Escribí una respuesta...' : 'Escribí un comentario'
           }
           rows={1}
-          value={content}
         />
 
         <Button
@@ -81,8 +107,10 @@ export function CommentForm({
         </Button>
       </div>
 
-      {error && (
-        <span className="pl-11 font-medium text-red-400 text-sm">{error}</span>
+      {serverError && (
+        <span className="pl-11 font-medium text-red-400 text-sm">
+          {serverError}
+        </span>
       )}
 
       {idParent && onDone && (

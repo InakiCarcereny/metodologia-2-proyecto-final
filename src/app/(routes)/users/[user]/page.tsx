@@ -7,9 +7,9 @@ import { PostList } from '@/components/PostList';
 import { ProfileHeader } from '@/components/ProfileHeader';
 import { ProfileTabs } from '@/components/ProfileTabs';
 import { getConnectedRepos } from '@/data/github';
+import { getUserPosts, getUserReposts } from '@/data/post';
 import { getUserProfileByUsername, isFollowingUser } from '@/data/profile';
 import { getInferredStack } from '@/data/stack';
-import { getUserPosts, getUserReposts } from '@/db/queries/posts';
 
 export default async function User({
   params,

@@ -1,20 +1,22 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import Image from 'next/image';
 import type { JSX } from 'react';
 import { useState, useTransition } from 'react';
 import { type SubmitHandler, useForm } from 'react-hook-form';
 import { createPost } from '@/actions/posts';
 import { AttachmentButton } from '@/components/AttachmentButton';
+import { ComposerCodeFields } from '@/components/ComposerCodeFields';
+import { ComposerImagePreview } from '@/components/ComposerImagePreview';
+import { ComposerTypeSelector } from '@/components/ComposerTypeSelector';
 import { PostCardAvatar } from '@/components/PostCardAvatar';
 import { TagInput } from '@/components/TagInput';
+import { Button } from '@/components/ui/Button';
+import { CardWrapper } from '@/components/ui/CardWrapper';
+import { Textarea } from '@/components/ui/Textarea';
 import { useImageUpload } from '@/hooks/useImageUpload';
 import { type CreatePostInput, createPostSchema } from '@/schemas/post';
 import { useUserStore } from '@/store/user-store';
-import { POST_TYPE_LABELS, type PostType } from './TypePill';
-import { Button } from './ui/Button';
-import { CardWrapper } from './ui/CardWrapper';
 
 interface ComposerProps {
   onPublished?: () => void;
@@ -28,6 +30,7 @@ export function Composer({
   const user = useUserStore((state) => state.user);
 
   const {
+    control,
     formState: { errors },
     handleSubmit,
     register,
@@ -58,7 +61,7 @@ export function Composer({
   const type = watch('type');
   const selectedTags = watch('tags') ?? [];
 
-  function resetComposer(): void {
+  const resetComposer = (): void => {
     reset({
       content: '',
       tags: [],
@@ -67,12 +70,12 @@ export function Composer({
 
     imageUpload.setUrl(null);
     setServerError(undefined);
-  }
+  };
 
-  function handleRemoveImage(): void {
+  const handleRemoveImage = (): void => {
     imageUpload.setUrl(null);
     setValue('imageUrl', undefined);
-  }
+  };
 
   const onSubmit: SubmitHandler<CreatePostInput> = async (data) => {
     setServerError(undefined);
@@ -129,33 +132,21 @@ export function Composer({
           </span>
         )}
 
-        <div className="flex flex-wrap gap-2">
-          {(Object.keys(POST_TYPE_LABELS) as PostType[]).map((postType) => (
-            <Button
-              className="px-3"
-              key={postType}
-              onClick={() =>
-                setValue('type', postType, { shouldValidate: true })
-              }
-              type="button"
-              variant={type === postType ? 'primary' : 'tertiary'}
-            >
-              {POST_TYPE_LABELS[postType]}
-            </Button>
-          ))}
-        </div>
-
-        {errors.type && (
-          <span className="font-medium text-red-400 text-sm">
-            {errors.type.message}
-          </span>
-        )}
+        <ComposerTypeSelector
+          error={errors.type?.message}
+          onChange={(postType) =>
+            setValue('type', postType, { shouldValidate: true })
+          }
+          value={type}
+        />
 
         {type && (
           <>
-            <textarea
-              {...register('content')}
-              className="min-h-24 w-full resize-y rounded-lg border border-[#d6d7db] bg-white p-3 text-[#494d56] text-sm placeholder:text-[#95989f] focus:outline-none"
+            <Textarea
+              className="min-h-24 w-full resize-y text-[#494d56] text-sm"
+              control={control}
+              error={errors.content}
+              name="content"
               placeholder={
                 type === 'snippet'
                   ? 'Contexto: qué intentaste, qué medía, qué querés que revisen. Markdown permitido.'
@@ -165,40 +156,11 @@ export function Composer({
               }
             />
 
-            {errors.content && (
-              <span className="font-medium text-red-400 text-sm">
-                {errors.content.message}
-              </span>
-            )}
-
             {type === 'snippet' && (
-              <div className="overflow-hidden rounded-lg bg-[#1b1e26]">
-                <div className="grid grid-cols-2 gap-3 border-white/10 border-b p-3">
-                  <input
-                    {...register('codeFilename')}
-                    className="min-w-0 bg-transparent font-mono text-[#c3c9d4] text-xs placeholder:text-[#878992] focus:outline-none"
-                    placeholder="ruta/archivo.ts"
-                  />
-
-                  <input
-                    {...register('codeLanguage')}
-                    className="min-w-0 bg-transparent text-right font-mono text-[#c3c9d4] text-xs placeholder:text-[#878992] focus:outline-none"
-                    placeholder="lenguaje: rust"
-                  />
-                </div>
-
-                <textarea
-                  {...register('codeSnippet')}
-                  className="min-h-48 w-full resize-y bg-transparent p-4 font-mono text-[#e4e6eb] text-xs placeholder:text-[#878992] focus:outline-none"
-                  placeholder="// pega tu código acá"
-                />
-
-                {errors.codeSnippet && (
-                  <span className="block px-4 pb-3 font-medium text-red-400 text-sm">
-                    {errors.codeSnippet.message}
-                  </span>
-                )}
-              </div>
+              <ComposerCodeFields
+                codeSnippetError={errors.codeSnippet}
+                register={register}
+              />
             )}
 
             <div className="flex flex-col gap-1">
@@ -211,24 +173,10 @@ export function Composer({
             </div>
 
             {imageUpload.url && (
-              <div className="relative overflow-hidden rounded-lg border border-[#dfe1e5]">
-                <Image
-                  alt="captura adjunta"
-                  className="h-auto max-h-64 w-full object-contain"
-                  height={338}
-                  src={imageUpload.url}
-                  width={600}
-                />
-
-                <Button
-                  className="absolute top-2 right-2 px-2"
-                  onClick={handleRemoveImage}
-                  type="button"
-                  variant="secondary"
-                >
-                  Quitar
-                </Button>
-              </div>
+              <ComposerImagePreview
+                onRemove={handleRemoveImage}
+                url={imageUpload.url}
+              />
             )}
 
             {imageUpload.error && (

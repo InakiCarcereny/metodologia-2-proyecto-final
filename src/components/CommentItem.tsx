@@ -4,7 +4,7 @@ import type { JSX } from 'react';
 import { useState } from 'react';
 import { CommentForm } from '@/components/CommentForm';
 import { PostCardAvatar } from '@/components/PostCardAvatar';
-import type { CommentThread } from '@/db/queries/comments';
+import type { CommentThread } from '@/data/comment';
 import { formatDisplayName } from '@/utils/format-display-name';
 import { formatRelativeTime } from '@/utils/format-relative-time';
 

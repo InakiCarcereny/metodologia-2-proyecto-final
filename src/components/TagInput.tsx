@@ -19,7 +19,7 @@ function normalizeTag(raw: string): string | null {
 export function TagInput({ onChange, values }: TagInputProps): JSX.Element {
   const [draft, setDraft] = useState('');
 
-  function commitDraft(): void {
+  const commitDraft = (): void => {
     const tag = normalizeTag(draft);
     setDraft('');
 
@@ -28,9 +28,9 @@ export function TagInput({ onChange, values }: TagInputProps): JSX.Element {
     if (values.includes(tag)) return;
 
     onChange([...values, tag]);
-  }
+  };
 
-  function handleKeyDown(event: KeyboardEvent<HTMLInputElement>): void {
+  const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>): void => {
     if (event.key === 'Enter' || event.key === ',') {
       event.preventDefault();
       commitDraft();
@@ -39,7 +39,7 @@ export function TagInput({ onChange, values }: TagInputProps): JSX.Element {
     if (event.key === 'Backspace' && draft === '' && values.length > 0) {
       onChange(values.slice(0, -1));
     }
-  }
+  };
 
   return (
     <div className="flex flex-col gap-1">
