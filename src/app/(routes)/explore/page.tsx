@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import type { JSX } from 'react';
 import { auth } from '@/auth';
@@ -11,6 +12,7 @@ import { searchExploreTags, searchExploreUsers } from '@/data/explore';
 import { getFeedPosts } from '@/data/post';
 import { getExploreUsersToFollow } from '@/data/profile';
 import { getTrendingTags, isFollowingTag } from '@/data/tag';
+import { cn } from '@/lib/utils';
 import type { PostType } from '@/types/post';
 
 interface ExplorePageProps {
@@ -109,30 +111,46 @@ export default async function Explore({
             </p>
           ) : (
             <div className="grid grid-cols-2">
-              {displayedTags.map((tag) => (
+              {displayedTags.map((tag, index) => (
                 <article
-                  className="flex flex-col gap-3 border-[#dfe1e5] border-b p-4 first:border-r"
+                  className={cn(
+                    'relative flex flex-col gap-3 border-[#dfe1e5] p-4',
+                    index % 2 === 0 && 'border-r',
+                    index < displayedTags.length - 2 && 'border-b',
+                  )}
                   key={tag.id}
                 >
-                  <div className="flex items-center justify-between gap-3">
-                    <h3 className="font-mono text-[#171b22] text-[15px]">
-                      #{tag.label}
-                    </h3>
+                  <Link
+                    aria-label={`Ver publicaciones con el tag ${tag.label}`}
+                    className="absolute inset-0 z-0 rounded-lg"
+                    href={`/tags/${encodeURIComponent(tag.label)}`}
+                  />
 
-                    <TagFollowButton
-                      className="min-w-24 px-3 py-1 text-[13px]"
-                      initialIsFollowing={followedTagIds.has(tag.id)}
-                      tagId={tag.id}
-                    />
+                  <div className="pointer-events-none relative z-10 flex flex-col gap-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <h3 className="font-mono text-[#171b22] text-[15px]">
+                        #{tag.label}
+                      </h3>
+
+                      <div className="pointer-events-auto">
+                        <TagFollowButton
+                          className="min-w-24 px-3 py-1 text-[13px]"
+                          initialIsFollowing={followedTagIds.has(tag.id)}
+                          tagId={tag.id}
+                        />
+                      </div>
+                    </div>
+
+                    {tag.description && (
+                      <p className="text-[#494d56] text-sm">
+                        {tag.description}
+                      </p>
+                    )}
+
+                    <span className="font-mono text-[#7e8288] text-xs">
+                      {tag.followersCount} seguidores · {tag.postsCount} posts
+                    </span>
                   </div>
-
-                  {tag.description && (
-                    <p className="text-[#494d56] text-sm">{tag.description}</p>
-                  )}
-
-                  <span className="font-mono text-[#7e8288] text-xs">
-                    {tag.followersCount} seguidores · {tag.postsCount} posts
-                  </span>
                 </article>
               ))}
             </div>
@@ -156,6 +174,9 @@ export default async function Explore({
                   bio={user.bio}
                   followersCount={user.followersCount}
                   id={user.id}
+                  isFollowing={
+                    'isFollowing' in user ? Boolean(user.isFollowing) : false
+                  }
                   isLastRow={index >= displayedUsers.length - 2}
                   isRightColumn={index % 2 === 1}
                   key={user.id}
