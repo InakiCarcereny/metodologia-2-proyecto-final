@@ -8,9 +8,9 @@ import { PostCard } from '@/components/PostCard';
 import { TagFollowButton } from '@/components/TagFollowButton';
 import { CardWrapper } from '@/components/ui/CardWrapper';
 import { searchExploreTags, searchExploreUsers } from '@/data/explore';
+import { getFeedPosts } from '@/data/post';
 import { getExploreUsersToFollow } from '@/data/profile';
 import { getTrendingTags, isFollowingTag } from '@/data/tag';
-import { getFeedPosts } from '@/db/queries/posts';
 import type { PostType } from '@/types/post';
 
 interface ExplorePageProps {
