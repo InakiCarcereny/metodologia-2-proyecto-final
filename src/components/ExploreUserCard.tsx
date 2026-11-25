@@ -10,6 +10,7 @@ interface ExploreUserCardProps {
   bio: string | null;
   followersCount: number;
   id: string;
+  isFollowing?: boolean;
   isLastRow?: boolean;
   isRightColumn?: boolean;
   username: string;
@@ -20,6 +21,7 @@ export function ExploreUserCard({
   bio,
   followersCount,
   id,
+  isFollowing = false,
   isLastRow = false,
   isRightColumn = false,
   username,
@@ -27,39 +29,50 @@ export function ExploreUserCard({
   return (
     <li
       className={cn(
-        'flex flex-col gap-3 border-[#dfe1e5] p-4',
+        'relative flex flex-col gap-3 border-[#dfe1e5] p-4',
         !isLastRow && 'border-b',
         !isRightColumn && 'border-r',
       )}
     >
-      <div className="flex items-start justify-between gap-3">
-        <Link
-          className="flex min-w-0 items-center gap-3"
-          href={`/users/${username}`}
-        >
-          <PostCardAvatar avatarUrl={avatarUrl} username={username} />
+      <Link
+        aria-label={`Ver perfil de ${username}`}
+        className="absolute inset-0 z-0 rounded-lg"
+        href={`/users/${encodeURIComponent(username)}`}
+      />
 
-          <div className="flex min-w-0 flex-col">
-            <span className="truncate font-bold text-[#171b22] text-[14px]">
-              {formatDisplayName(username)}
-            </span>
+      <div className="pointer-events-none relative z-10 flex flex-col gap-3">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-3">
+            <PostCardAvatar avatarUrl={avatarUrl} username={username} />
 
-            <span className="truncate font-mono text-[#7e8288] text-[12px]">
-              @{username}
-            </span>
+            <div className="flex min-w-0 flex-col">
+              <span className="truncate font-bold text-[#171b22] text-[14px]">
+                {formatDisplayName(username)}
+              </span>
+
+              <span className="truncate font-mono text-[#7e8288] text-[12px]">
+                @{username}
+              </span>
+            </div>
           </div>
-        </Link>
 
-        <FollowButton className="min-w-20 px-3 py-1" userId={id} />
+          <div className="pointer-events-auto">
+            <FollowButton
+              className="min-w-20 px-3 py-1"
+              initialIsFollowing={isFollowing}
+              userId={id}
+            />
+          </div>
+        </div>
+
+        <p className="line-clamp-2 h-10 overflow-hidden text-[#494d56] text-[13px] leading-relaxed">
+          {bio ?? ''}
+        </p>
+
+        <span className="font-mono text-[#7e8288] text-xs">
+          {followersCount} seguidores
+        </span>
       </div>
-
-      <p className="line-clamp-2 h-10 overflow-hidden text-[#494d56] text-[13px] leading-relaxed">
-        {bio ?? ''}
-      </p>
-
-      <span className="font-mono text-[#7e8288] text-xs">
-        {followersCount} seguidores
-      </span>
     </li>
   );
 }
