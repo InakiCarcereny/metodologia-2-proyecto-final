@@ -102,8 +102,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Push schema
-        run: pnpm exec drizzle-kit push --force
+      - name: Run migrations
+        run: pnpm db:migrate
         env:
           DATABASE_URL: postgres://postgres:${{ secrets.CI_DB_PASSWORD }}@localhost:5432/mi_app
 
