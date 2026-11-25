@@ -5,6 +5,7 @@ import type { FormEvent, JSX } from 'react';
 import { useCallback, useEffect, useState, useTransition } from 'react';
 import { Button } from '@/components/ui/Button';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
+import { normalizeSearchQuery } from '@/utils/normalize-search-query';
 
 export function ExploreSearch(): JSX.Element {
   const pathname = usePathname();
@@ -20,7 +21,7 @@ export function ExploreSearch(): JSX.Element {
   const updateSearch = useCallback(
     (value: string): void => {
       const params = new URLSearchParams(searchParams.toString());
-      const normalizedValue = value.trim();
+      const normalizedValue = normalizeSearchQuery(value);
 
       if (normalizedValue.length > 0) {
         params.set('q', normalizedValue);
@@ -39,7 +40,7 @@ export function ExploreSearch(): JSX.Element {
   );
 
   useEffect(() => {
-    const normalizedQuery = debouncedQuery.trim();
+    const normalizedQuery = normalizeSearchQuery(debouncedQuery);
     const currentQuery = searchParams.get('q') ?? '';
 
     if (normalizedQuery === currentQuery) return;
