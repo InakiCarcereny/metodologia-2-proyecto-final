@@ -1,9 +1,9 @@
 import type { JSX } from 'react';
 import { auth } from '@/auth';
 import { Composer } from '@/components/Composer';
+import { Feed } from '@/components/Feed';
 import { FeedTabs } from '@/components/FeedTabs';
-import { PostCard } from '@/components/PostCard';
-import { type FeedTab, getFeedPosts } from '@/db/queries/posts';
+import { FEED_PAGE_SIZE, type FeedTab, getFeedPosts } from '@/data/post';
 
 interface HomeProps {
   searchParams: Promise<{ tab?: string }>;
@@ -29,13 +29,12 @@ export default async function Home({
         <FeedTabs activeTab={activeTab} />
       </div>
 
-      {feed.length === 0 ? (
-        <p className="py-10 text-center font-mono text-[#878992] text-sm">
-          Todavía no hay posts por acá
-        </p>
-      ) : (
-        feed.map((post) => <PostCard key={post.id} post={post} />)
-      )}
+      <Feed
+        emptyMessage="Todavía no hay posts por acá"
+        initialHasMore={feed.length === FEED_PAGE_SIZE}
+        initialPosts={feed}
+        tab={activeTab}
+      />
     </div>
   );
 }
