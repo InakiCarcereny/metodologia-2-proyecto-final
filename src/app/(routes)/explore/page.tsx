@@ -126,7 +126,7 @@ export default async function Explore({
         <h2 className="font-medium text-[#878992] text-[12px]">{tagsTitle}</h2>
 
         <CardWrapper className="overflow-hidden p-0">
-          <div className="grid auto-rows-[110px] grid-cols-2">
+          <div className="grid auto-rows-[150px] grid-cols-2">
             {tagSlots.map((tag, index) => {
               const cellClassName = cn(
                 'border-[#dfe1e5] p-4',
@@ -174,12 +174,12 @@ export default async function Explore({
                     </div>
 
                     {tag.description && (
-                      <p className="text-[#494d56] text-sm">
+                      <p className="line-clamp-2 text-[#494d56] text-sm">
                         {tag.description}
                       </p>
                     )}
 
-                    <span className="font-mono text-[#7e8288] text-xs">
+                    <span className="mt-auto font-mono text-[#7e8288] text-xs">
                       {tag.followersCount} seguidores · {tag.postsCount} posts
                     </span>
                   </div>
