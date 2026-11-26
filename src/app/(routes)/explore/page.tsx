@@ -16,7 +16,10 @@ import { cn } from '@/lib/utils';
 import type { PostType } from '@/types/post';
 
 interface ExplorePageProps {
-  searchParams: Promise<{ q?: string; type?: string }>;
+  searchParams: Promise<{
+    q?: string;
+    type?: string;
+  }>;
 }
 
 function getPostType(value: string | undefined): PostType | undefined {
@@ -41,6 +44,7 @@ export default async function Explore({
   const query = params.q?.trim() ?? '';
   const activeType = getPostType(params.type);
   const hasSearch = query.length > 0;
+  const searchLimit = hasSearch ? 5 : 4;
 
   const [
     recommendedTags,
@@ -56,9 +60,29 @@ export default async function Explore({
       type: activeType,
       viewerId: userId,
     }),
-    searchExploreTags(query),
-    searchExploreUsers(query, userId),
+    searchExploreTags(query, searchLimit),
+    searchExploreUsers(query, userId, searchLimit),
   ]);
+
+  const displayedTags =
+    hasSearch && searchedTags.length > 0
+      ? searchedTags.slice(0, 4)
+      : recommendedTags.slice(0, 4);
+
+  const displayedUsers =
+    hasSearch && searchedUsers.length > 0
+      ? searchedUsers.slice(0, 4)
+      : recommendedUsers.slice(0, 4);
+
+  const tagSlots = Array.from(
+    { length: 4 },
+    (_, index) => displayedTags[index] ?? null,
+  );
+
+  const userSlots = Array.from(
+    { length: 4 },
+    (_, index) => displayedUsers[index] ?? null,
+  );
 
   const allTags = [...recommendedTags, ...searchedTags];
 
@@ -73,11 +97,8 @@ export default async function Explore({
     ).filter((id): id is string => id !== null),
   );
 
-  const displayedTags =
-    hasSearch && searchedTags.length > 0 ? searchedTags : recommendedTags;
-
-  const displayedUsers =
-    hasSearch && searchedUsers.length > 0 ? searchedUsers : recommendedUsers;
+  const hasMoreTags = hasSearch && searchedTags.length > 4;
+  const hasMoreUsers = hasSearch && searchedUsers.length > 4;
 
   const tagsTitle = !hasSearch
     ? 'TAGS PARA SEGUIR'
@@ -104,19 +125,30 @@ export default async function Explore({
       <section className="flex flex-col gap-3">
         <h2 className="font-medium text-[#878992] text-[12px]">{tagsTitle}</h2>
 
-        <CardWrapper>
-          {displayedTags.length === 0 ? (
-            <p className="font-mono text-[#878992] text-sm">
-              No hay tags disponibles.
-            </p>
-          ) : (
-            <div className="grid grid-cols-2">
-              {displayedTags.map((tag, index) => (
+        <CardWrapper className="overflow-hidden p-0">
+          <div className="grid auto-rows-[110px] grid-cols-2">
+            {tagSlots.map((tag, index) => {
+              const cellClassName = cn(
+                'border-[#dfe1e5] p-4',
+                index % 2 === 0 && 'border-r',
+                index < 2 && 'border-b',
+              );
+
+              if (!tag) {
+                return (
+                  <div
+                    aria-hidden
+                    className={cellClassName}
+                    key={`empty-tag-${index}`}
+                  />
+                );
+              }
+
+              return (
                 <article
                   className={cn(
-                    'relative flex flex-col gap-3 border-[#dfe1e5] p-4',
-                    index % 2 === 0 && 'border-r',
-                    index < displayedTags.length - 2 && 'border-b',
+                    'relative flex flex-col gap-3 transition-colors hover:bg-[#fafafa]',
+                    cellClassName,
                   )}
                   key={tag.id}
                 >
@@ -152,7 +184,18 @@ export default async function Explore({
                     </span>
                   </div>
                 </article>
-              ))}
+              );
+            })}
+          </div>
+
+          {hasMoreTags && (
+            <div className="flex justify-end border-[#dfe1e5] border-t p-3">
+              <Link
+                className="font-mono text-[#4265b3] text-xs hover:underline"
+                href={`/explore/tags?q=${encodeURIComponent(query)}`}
+              >
+                ver más →
+              </Link>
             </div>
           )}
         </CardWrapper>
@@ -161,14 +204,24 @@ export default async function Explore({
       <section className="flex flex-col gap-3">
         <h2 className="font-medium text-[#878992] text-[12px]">{usersTitle}</h2>
 
-        <CardWrapper>
-          {displayedUsers.length === 0 ? (
-            <p className="font-mono text-[#878992] text-sm">
-              No hay usuarios disponibles.
-            </p>
-          ) : (
-            <ul className="grid grid-cols-2">
-              {displayedUsers.map((user, index) => (
+        <CardWrapper className="overflow-hidden p-0">
+          <ul className="grid auto-rows-[160px] grid-cols-2">
+            {userSlots.map((user, index) => {
+              if (!user) {
+                return (
+                  <li
+                    aria-hidden
+                    className={cn(
+                      'border-[#dfe1e5] p-4',
+                      index % 2 === 0 && 'border-r',
+                      index < 2 && 'border-b',
+                    )}
+                    key={`empty-user-${index}`}
+                  />
+                );
+              }
+
+              return (
                 <ExploreUserCard
                   avatarUrl={user.avatarUrl}
                   bio={user.bio}
@@ -177,13 +230,24 @@ export default async function Explore({
                   isFollowing={
                     'isFollowing' in user ? Boolean(user.isFollowing) : false
                   }
-                  isLastRow={index >= displayedUsers.length - 2}
+                  isLastRow={index >= 2}
                   isRightColumn={index % 2 === 1}
                   key={user.id}
                   username={user.username}
                 />
-              ))}
-            </ul>
+              );
+            })}
+          </ul>
+
+          {hasMoreUsers && (
+            <div className="flex justify-end border-[#dfe1e5] border-t p-3">
+              <Link
+                className="font-mono text-[#4265b3] text-xs hover:underline"
+                href={`/explore/users?q=${encodeURIComponent(query)}`}
+              >
+                ver más →
+              </Link>
+            </div>
           )}
         </CardWrapper>
       </section>
