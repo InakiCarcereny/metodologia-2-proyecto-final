@@ -3,7 +3,13 @@
 import { and, eq, inArray } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { auth } from '@/auth';
-import { FEED_PAGE_SIZE, type FeedTab, getFeedPosts } from '@/data/post';
+import {
+  type BookmarkFilter,
+  FEED_PAGE_SIZE,
+  type FeedTab,
+  getBookmarkedPosts,
+  getFeedPosts,
+} from '@/data/post';
 import { db } from '@/db';
 import {
   bookmarks,
@@ -206,5 +212,31 @@ export async function fetchMoreFeedPosts({
     return { hasMore: morePosts.length === FEED_PAGE_SIZE, posts: morePosts };
   } catch {
     return { error: 'No se pudieron cargar más posts' };
+  }
+}
+
+export async function fetchMoreBookmarks({
+  filter,
+  offset,
+}: {
+  filter: BookmarkFilter;
+  offset: number;
+}): Promise<{ hasMore: boolean; posts: Post[] } | { error: string }> {
+  try {
+    const session = await auth();
+
+    if (!session?.user?.id) {
+      return { error: 'No autenticado' };
+    }
+
+    const morePosts = await getBookmarkedPosts({
+      idUser: session.user.id,
+      offset,
+      type: filter === 'all' ? undefined : filter,
+    });
+
+    return { hasMore: morePosts.length === FEED_PAGE_SIZE, posts: morePosts };
+  } catch {
+    return { error: 'No se pudieron cargar más guardados' };
   }
 }

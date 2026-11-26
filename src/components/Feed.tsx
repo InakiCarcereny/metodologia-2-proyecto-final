@@ -1,11 +1,12 @@
 'use client';
 
 import type { JSX } from 'react';
-import { useEffect, useRef, useState, useTransition } from 'react';
+import { useEffect, useRef } from 'react';
 import { fetchMoreFeedPosts } from '@/actions/posts';
 import { PostCard } from '@/components/PostCard';
 import { Button } from '@/components/ui/Button';
 import type { FeedTab } from '@/data/post';
+import { usePaginatedPosts } from '@/hooks/usePaginatedPosts';
 import type { Post } from '@/types/post';
 
 interface FeedProps {
@@ -21,10 +22,12 @@ export function Feed({
   initialPosts,
   tab,
 }: FeedProps): JSX.Element {
-  const [posts, setPosts] = useState<Post[]>(initialPosts);
-  const [hasMore, setHasMore] = useState(initialHasMore);
-  const [error, setError] = useState<string>();
-  const [isPending, startTransition] = useTransition();
+  const { error, hasMore, isPending, loadMore, posts, setHasMore, setPosts } =
+    usePaginatedPosts({
+      fetchMore: (offset) => fetchMoreFeedPosts({ offset, tab }),
+      initialHasMore,
+      initialPosts,
+    });
   const previousTab = useRef(tab);
 
   useEffect(() => {
@@ -41,24 +44,7 @@ export function Feed({
 
       return newPosts.length > 0 ? [...newPosts, ...current] : current;
     });
-  }, [tab, initialPosts, initialHasMore]);
-
-  const handleLoadMore = (): void => {
-    if (isPending) return;
-    setError(undefined);
-
-    startTransition(async () => {
-      const result = await fetchMoreFeedPosts({ offset: posts.length, tab });
-
-      if ('error' in result) {
-        setError(result.error);
-        return;
-      }
-
-      setPosts((current) => [...current, ...result.posts]);
-      setHasMore(result.hasMore);
-    });
-  };
+  }, [tab, initialPosts, initialHasMore, setPosts, setHasMore]);
 
   if (posts.length === 0) {
     return (
@@ -85,7 +71,7 @@ export function Feed({
           <Button
             className="bg-none text-[#676b72] hover:text-black"
             disabled={isPending}
-            onClick={handleLoadMore}
+            onClick={loadMore}
             type="button"
             variant={null}
           >
