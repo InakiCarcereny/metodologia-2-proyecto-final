@@ -20,6 +20,8 @@ export const FEED_PAGE_SIZE = 20;
 
 export type FeedTab = 'for-you' | 'following';
 
+export type BookmarkFilter = 'all' | PostType;
+
 const POST_COLUMNS = {
   avatarUrl: profiles.avatarUrl,
   codeFilename: posts.codeFilename,
@@ -286,4 +288,58 @@ export async function getPostById(
   const [post] = await buildPosts(rows, viewerId);
 
   return post ?? null;
+}
+
+export async function getBookmarkedPosts({
+  idUser,
+  limit = FEED_PAGE_SIZE,
+  offset = 0,
+  type,
+}: {
+  idUser: string;
+  limit?: number;
+  offset?: number;
+  type?: PostType;
+}): Promise<Post[]> {
+  const where = type
+    ? and(eq(bookmarks.idUser, idUser), eq(posts.type, type))
+    : eq(bookmarks.idUser, idUser);
+
+  const rows = await db
+    .select(POST_COLUMNS)
+    .from(bookmarks)
+    .innerJoin(posts, eq(posts.id, bookmarks.idPost))
+    .innerJoin(users, eq(users.id, posts.idUser))
+    .leftJoin(profiles, eq(profiles.id, users.id))
+    .where(where)
+    .orderBy(desc(bookmarks.createdAt))
+    .limit(limit)
+    .offset(offset);
+
+  return buildPosts(rows, idUser);
+}
+
+export async function getBookmarkCounts(
+  idUser: string,
+): Promise<Record<BookmarkFilter, number>> {
+  const rows = await db
+    .select({ total: count(), type: posts.type })
+    .from(bookmarks)
+    .innerJoin(posts, eq(posts.id, bookmarks.idPost))
+    .where(eq(bookmarks.idUser, idUser))
+    .groupBy(posts.type);
+
+  const counts: Record<BookmarkFilter, number> = {
+    all: 0,
+    article: 0,
+    question: 0,
+    snippet: 0,
+  };
+
+  for (const row of rows) {
+    counts[row.type] = row.total;
+    counts.all += row.total;
+  }
+
+  return counts;
 }
