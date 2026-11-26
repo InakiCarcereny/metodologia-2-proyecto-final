@@ -23,7 +23,7 @@ export interface ExploreUserResult {
 export async function searchExploreUsers(
   query: string,
   currentUserId: string,
-  limit = 8,
+  limit = 4,
 ): Promise<ExploreUserResult[]> {
   const searchPattern = `%${query.trim()}%`;
 
@@ -78,7 +78,7 @@ export async function searchExploreUsers(
 
 export async function searchExploreTags(
   query: string,
-  limit = 8,
+  limit = 4,
 ): Promise<TagCardData[]> {
   const searchPattern = `%${query.trim()}%`;
 
