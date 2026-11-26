@@ -4,16 +4,20 @@ import type { JSX } from 'react';
 import { auth } from '@/auth';
 import { ExploreFilters } from '@/components/ExploreFilters';
 import { ExploreSearch } from '@/components/ExploreSearch';
+import { ExploreTagCard } from '@/components/ExploreTagCard';
 import { ExploreUserCard } from '@/components/ExploreUserCard';
 import { PostCard } from '@/components/PostCard';
-import { TagFollowButton } from '@/components/TagFollowButton';
 import { CardWrapper } from '@/components/ui/CardWrapper';
-import { searchExploreTags, searchExploreUsers } from '@/data/explore';
 import { getFeedPosts } from '@/data/post';
-import { getExploreUsersToFollow } from '@/data/profile';
-import { getTrendingTags, isFollowingTag } from '@/data/tag';
+import { getExploreUsersToFollow, searchExploreUsers } from '@/data/profile';
+import {
+  getFollowedTagIds,
+  getTrendingTags,
+  searchExploreTags,
+} from '@/data/tag';
 import { cn } from '@/lib/utils';
 import type { PostType } from '@/types/post';
+import { buildExploreSection } from '@/utils/build-explore-section';
 
 interface ExplorePageProps {
   searchParams: Promise<{
@@ -46,15 +50,7 @@ export default async function Explore({
   const hasSearch = query.length > 0;
   const searchLimit = hasSearch ? 5 : 4;
 
-  const [
-    recommendedTags,
-    recommendedUsers,
-    posts,
-    searchedTags,
-    searchedUsers,
-  ] = await Promise.all([
-    getTrendingTags(4),
-    getExploreUsersToFollow(userId, 4),
+  const [posts, searchedTags, searchedUsers] = await Promise.all([
     getFeedPosts({
       query,
       type: activeType,
@@ -64,53 +60,40 @@ export default async function Explore({
     searchExploreUsers(query, userId, searchLimit),
   ]);
 
-  const displayedTags =
-    hasSearch && searchedTags.length > 0
-      ? searchedTags.slice(0, 4)
-      : recommendedTags.slice(0, 4);
+  const needsRecommendedTags = !hasSearch || searchedTags.length === 0;
+  const needsRecommendedUsers = !hasSearch || searchedUsers.length === 0;
 
-  const displayedUsers =
-    hasSearch && searchedUsers.length > 0
-      ? searchedUsers.slice(0, 4)
-      : recommendedUsers.slice(0, 4);
+  const [recommendedTags, recommendedUsers] = await Promise.all([
+    needsRecommendedTags ? getTrendingTags(4) : Promise.resolve([]),
+    needsRecommendedUsers
+      ? getExploreUsersToFollow(userId, 4)
+      : Promise.resolve([]),
+  ]);
 
-  const tagSlots = Array.from(
-    { length: 4 },
-    (_, index) => displayedTags[index] ?? null,
+  const tagsSection = buildExploreSection(
+    searchedTags,
+    recommendedTags,
+    hasSearch,
+    {
+      found: 'TAGS ENCONTRADOS',
+      notFound: 'TAG NO ENCONTRADO · TAGS RECOMENDADOS',
+      recommended: 'TAGS PARA SEGUIR',
+    },
   );
 
-  const userSlots = Array.from(
-    { length: 4 },
-    (_, index) => displayedUsers[index] ?? null,
+  const usersSection = buildExploreSection(
+    searchedUsers,
+    recommendedUsers,
+    hasSearch,
+    {
+      found: 'USUARIOS ENCONTRADOS',
+      notFound: 'USUARIO NO ENCONTRADO · USUARIOS RECOMENDADOS',
+      recommended: 'USUARIOS PARA SEGUIR',
+    },
   );
 
-  const allTags = [...recommendedTags, ...searchedTags];
-
-  const followedTagIds = new Set(
-    (
-      await Promise.all(
-        allTags.map(async (tag) => {
-          const following = await isFollowingTag(userId, tag.id);
-          return following ? tag.id : null;
-        }),
-      )
-    ).filter((id): id is string => id !== null),
-  );
-
-  const hasMoreTags = hasSearch && searchedTags.length > 4;
-  const hasMoreUsers = hasSearch && searchedUsers.length > 4;
-
-  const tagsTitle = !hasSearch
-    ? 'TAGS PARA SEGUIR'
-    : searchedTags.length > 0
-      ? 'TAGS ENCONTRADOS'
-      : 'TAG NO ENCONTRADO · TAGS RECOMENDADOS';
-
-  const usersTitle = !hasSearch
-    ? 'USUARIOS PARA SEGUIR'
-    : searchedUsers.length > 0
-      ? 'USUARIOS ENCONTRADOS'
-      : 'USUARIO NO ENCONTRADO · USUARIOS RECOMENDADOS';
+  const allTagIds = [...recommendedTags, ...searchedTags].map((tag) => tag.id);
+  const followedTagIds = await getFollowedTagIds(userId, allTagIds);
 
   return (
     <div className="flex flex-col gap-6">
@@ -123,72 +106,31 @@ export default async function Explore({
       <ExploreFilters activeType={activeType} />
 
       <section className="flex flex-col gap-3">
-        <h2 className="font-medium text-[#878992] text-[12px]">{tagsTitle}</h2>
+        <h2 className="font-medium text-[#878992] text-[12px]">
+          {tagsSection.title}
+        </h2>
 
         <CardWrapper className="overflow-hidden p-0">
-          <div className="grid auto-rows-[150px] grid-cols-2">
-            {tagSlots.map((tag, index) => {
+          <div className="grid auto-rows-37.5 grid-cols-2">
+            {tagsSection.slots.map((tag, index) => {
               const cellClassName = cn(
                 'border-[#dfe1e5] p-4',
                 index % 2 === 0 && 'border-r',
                 index < 2 && 'border-b',
               );
 
-              if (!tag) {
-                return (
-                  <div
-                    aria-hidden
-                    className={cellClassName}
-                    key={`empty-tag-${index}`}
-                  />
-                );
-              }
-
               return (
-                <article
-                  className={cn(
-                    'relative flex flex-col gap-3 transition-colors hover:bg-[#fafafa]',
-                    cellClassName,
-                  )}
-                  key={tag.id}
-                >
-                  <Link
-                    aria-label={`Ver publicaciones con el tag ${tag.label}`}
-                    className="absolute inset-0 z-0 rounded-lg"
-                    href={`/tags/${encodeURIComponent(tag.label)}`}
-                  />
-
-                  <div className="pointer-events-none relative z-10 flex flex-col gap-3">
-                    <div className="flex items-center justify-between gap-3">
-                      <h3 className="font-mono text-[#171b22] text-[15px]">
-                        #{tag.label}
-                      </h3>
-
-                      <div className="pointer-events-auto">
-                        <TagFollowButton
-                          className="min-w-24 px-3 py-1 text-[13px]"
-                          initialIsFollowing={followedTagIds.has(tag.id)}
-                          tagId={tag.id}
-                        />
-                      </div>
-                    </div>
-
-                    {tag.description && (
-                      <p className="line-clamp-2 text-[#494d56] text-sm">
-                        {tag.description}
-                      </p>
-                    )}
-
-                    <span className="mt-auto font-mono text-[#7e8288] text-xs">
-                      {tag.followersCount} seguidores · {tag.postsCount} posts
-                    </span>
-                  </div>
-                </article>
+                <ExploreTagCard
+                  cellClassName={cellClassName}
+                  isFollowing={tag ? followedTagIds.has(tag.id) : false}
+                  key={tag?.id ?? `empty-tag-${index}`}
+                  tag={tag}
+                />
               );
             })}
           </div>
 
-          {hasMoreTags && (
+          {tagsSection.hasMore && (
             <div className="flex justify-end border-[#dfe1e5] border-t p-3">
               <Link
                 className="font-mono text-[#4265b3] text-xs hover:underline"
@@ -202,11 +144,13 @@ export default async function Explore({
       </section>
 
       <section className="flex flex-col gap-3">
-        <h2 className="font-medium text-[#878992] text-[12px]">{usersTitle}</h2>
+        <h2 className="font-medium text-[#878992] text-[12px]">
+          {usersSection.title}
+        </h2>
 
         <CardWrapper className="overflow-hidden p-0">
-          <ul className="grid auto-rows-[160px] grid-cols-2">
-            {userSlots.map((user, index) => {
+          <ul className="grid auto-rows-40 grid-cols-2">
+            {usersSection.slots.map((user, index) => {
               if (!user) {
                 return (
                   <li
@@ -239,7 +183,7 @@ export default async function Explore({
             })}
           </ul>
 
-          {hasMoreUsers && (
+          {usersSection.hasMore && (
             <div className="flex justify-end border-[#dfe1e5] border-t p-3">
               <Link
                 className="font-mono text-[#4265b3] text-xs hover:underline"
