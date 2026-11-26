@@ -167,7 +167,12 @@ async function getUserProfile(
       countFollowing(row.id),
     ]);
 
-    return { ...row, followersCount, followingCount, postsCount };
+    return {
+      ...row,
+      followersCount,
+      followingCount,
+      postsCount,
+    };
   } catch {
     return null;
   }
@@ -206,7 +211,6 @@ export async function getUserCardDataById(
 
     return {
       ...row,
-      avatarUrl: row.avatarUrl,
       followersCount,
     };
   } catch {
@@ -217,8 +221,11 @@ export async function getUserCardDataById(
 export async function getSuggestedUserCards(
   currentUserId: string,
   limit = 3,
+  randomOrder = true,
 ): Promise<UserCardData[]> {
   try {
+    const order = randomOrder ? sql`RANDOM()` : desc(users.createdAt);
+
     const rows = await db
       .select({
         avatarUrl: profiles.avatarUrl,
@@ -242,17 +249,59 @@ export async function getSuggestedUserCards(
         ),
       )
       .groupBy(users.id, profiles.avatarUrl, users.username)
-      .orderBy(sql`RANDOM()`)
+      .orderBy(order)
       .limit(limit);
 
     const followersCounts = await Promise.all(
       rows.map((row) => countFollowers(row.id)),
     );
 
-    return rows.map((row, i) => ({
+    return rows.map((row, index) => ({
       ...row,
-      followersCount: followersCounts[i] ?? 0,
+      followersCount: followersCounts[index] ?? 0,
     }));
+  } catch {
+    return [];
+  }
+}
+
+export async function getExploreUsersToFollow(
+  currentUserId: string,
+  limit = 4,
+) {
+  try {
+    return await db
+      .select({
+        avatarUrl: profiles.avatarUrl,
+        bio: profiles.bio,
+        followersCount: count(followers.idFollower).mapWith(Number),
+        id: users.id,
+        username: users.username,
+      })
+      .from(users)
+      .leftJoin(profiles, eq(profiles.id, users.id))
+      .leftJoin(followers, eq(followers.idUser, users.id))
+      .where(
+        and(
+          ne(users.id, currentUserId),
+          notInArray(
+            users.id,
+            db
+              .select({ id: followers.idUser })
+              .from(followers)
+              .where(eq(followers.idFollower, currentUserId)),
+          ),
+        ),
+      )
+      .groupBy(
+        users.id,
+        users.username,
+        users.createdAt,
+        profiles.avatarUrl,
+        profiles.bio,
+      )
+      .orderBy(desc(count(followers.idFollower)), desc(users.createdAt))
+      .limit(limit);
   } catch {
     return [];
   }

@@ -1,4 +1,13 @@
-import { and, count, desc, eq, inArray, or, type SQL } from 'drizzle-orm';
+import {
+  and,
+  count,
+  desc,
+  eq,
+  ilike,
+  inArray,
+  or,
+  type SQL,
+} from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 import { db } from '@/db';
 import {
@@ -84,12 +93,15 @@ async function buildPosts(rows: PostRow[], viewerId?: string): Promise<Post[]> {
   const commentsById = new Map(
     commentCounts.map((row) => [row.idPost, row.total]),
   );
+
   const likesById = new Map(likeCounts.map((row) => [row.idPost, row.total]));
+
   const repostsById = new Map(
     repostCounts.map((row) => [row.idPost, row.total]),
   );
 
   const tagsByPost = new Map<string, Pick<Tag, 'id' | 'label'>[]>();
+
   for (const row of tagRows) {
     const current = tagsByPost.get(row.idPost) ?? [];
     current.push({ id: row.id, label: row.label });
@@ -167,15 +179,19 @@ async function buildPosts(rows: PostRow[], viewerId?: string): Promise<Post[]> {
 export async function getFeedPosts({
   limit = FEED_PAGE_SIZE,
   offset = 0,
+  query,
   tab = 'for-you',
+  type,
   viewerId,
 }: {
   limit?: number;
   offset?: number;
+  query?: string;
   tab?: FeedTab;
+  type?: PostType;
   viewerId?: string;
 }): Promise<Post[]> {
-  let where: SQL | undefined;
+  const conditions: SQL[] = [];
 
   if (tab === 'following') {
     if (!viewerId) return [];
@@ -185,8 +201,35 @@ export async function getFeedPosts({
       .from(followers)
       .where(eq(followers.idFollower, viewerId));
 
-    where = or(eq(posts.idUser, viewerId), inArray(posts.idUser, followedIds));
+    const followingCondition = or(
+      eq(posts.idUser, viewerId),
+      inArray(posts.idUser, followedIds),
+    );
+
+    if (followingCondition) {
+      conditions.push(followingCondition);
+    }
   }
+
+  if (type) {
+    conditions.push(eq(posts.type, type));
+  }
+
+  if (query?.trim()) {
+    const searchPattern = `%${query.trim()}%`;
+
+    const searchCondition = or(
+      ilike(posts.title, searchPattern),
+      ilike(posts.content, searchPattern),
+      ilike(users.username, searchPattern),
+    );
+
+    if (searchCondition) {
+      conditions.push(searchCondition);
+    }
+  }
+
+  const where = conditions.length > 0 ? and(...conditions) : undefined;
 
   const rows = await db
     .select(POST_COLUMNS)
