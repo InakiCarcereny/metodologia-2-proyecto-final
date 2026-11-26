@@ -1,7 +1,7 @@
 'use client';
 
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import type { JSX } from 'react';
+import { useQueryParam } from '@/hooks/useQueryParam';
 import { cn } from '@/lib/utils';
 import type { PostType } from '@/types/post';
 
@@ -9,43 +9,25 @@ interface ExploreFiltersProps {
   activeType?: PostType;
 }
 
-const FILTERS: Array<{
+interface ExploreFilter {
   label: string;
   value: PostType;
-}> = [
-  {
-    label: 'tipo:snippet',
-    value: 'snippet',
-  },
-  {
-    label: 'tipo:pregunta',
-    value: 'question',
-  },
-  {
-    label: 'tipo:artículo',
-    value: 'article',
-  },
+}
+
+const FILTERS: ExploreFilter[] = [
+  { label: 'tipo:snippet', value: 'snippet' },
+  { label: 'tipo:pregunta', value: 'question' },
+  { label: 'tipo:artículo', value: 'article' },
 ];
 
 export function ExploreFilters({
   activeType,
 }: ExploreFiltersProps): JSX.Element {
-  const pathname = usePathname();
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const { setParam } = useQueryParam();
 
-  function handleFilterChange(type: PostType): void {
-    const params = new URLSearchParams(searchParams.toString());
-
-    if (activeType === type) {
-      params.delete('type');
-    } else {
-      params.set('type', type);
-    }
-
-    const query = params.toString();
-    router.push(query ? `${pathname}?${query}` : pathname);
-  }
+  const handleFilterChange = (type: PostType): void => {
+    setParam('type', activeType === type ? null : type);
+  };
 
   return (
     <div className="flex flex-wrap items-center gap-2">

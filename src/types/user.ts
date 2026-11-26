@@ -23,3 +23,12 @@ export type UserListItem = Pick<
   followsViewer: boolean;
   isFollowing: boolean;
 };
+
+export type ExploreUserSuggestion = Pick<
+  UserProfile,
+  'id' | 'username' | 'avatarUrl' | 'bio' | 'followersCount'
+>;
+
+export type ExploreUserCardData = ExploreUserSuggestion & {
+  isFollowing: boolean;
+};

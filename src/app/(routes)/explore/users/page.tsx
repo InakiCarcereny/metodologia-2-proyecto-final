@@ -4,7 +4,7 @@ import type { JSX } from 'react';
 import { auth } from '@/auth';
 import { ExploreUserCard } from '@/components/ExploreUserCard';
 import { CardWrapper } from '@/components/ui/CardWrapper';
-import { searchExploreUsers } from '@/data/explore';
+import { searchExploreUsers } from '@/data/profile';
 
 interface ExploreUsersPageProps {
   searchParams: Promise<{ q?: string }>;
