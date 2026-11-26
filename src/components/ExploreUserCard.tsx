@@ -29,7 +29,7 @@ export function ExploreUserCard({
   return (
     <li
       className={cn(
-        'relative flex flex-col gap-3 border-[#dfe1e5] p-4',
+        'relative flex flex-col gap-3 border-[#dfe1e5] p-4 transition-colors hover:bg-[#fafafa]',
         !isLastRow && 'border-b',
         !isRightColumn && 'border-r',
       )}
