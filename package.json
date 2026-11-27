@@ -24,6 +24,7 @@
     "@commitlint/cli": "21.2.2",
     "@commitlint/config-conventional": "21.2.2",
     "@faker-js/faker": "10.6.0",
+    "@playwright/test": "^1.65.1",
     "@tailwindcss/postcss": "4",
     "@testing-library/jest-dom": "7.0.1",
     "@testing-library/react": "16.3.3",
@@ -77,6 +78,9 @@
     "start": "next start",
     "test": "vitest run --passWithNoTests",
     "test:coverage": "vitest run --coverage --passWithNoTests",
+    "test:e2e": "playwright test",
+    "test:integration": "vitest run src/tests/integration",
+    "test:unit": "vitest run src/tests/unit",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit"
   },
