@@ -79,6 +79,8 @@
     "test": "vitest run --passWithNoTests",
     "test:coverage": "vitest run --coverage --passWithNoTests",
     "test:e2e": "playwright test",
+    "test:integration": "vitest run src/tests/integration",
+    "test:unit": "vitest run src/tests/unit",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit"
   },
