@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import type { JSX } from 'react';
 import { FollowButton } from '@/components/FollowButton';
-import { PostCardAvatar } from '@/components/PostCardAvatar';
+import { UserAvatar } from '@/components/UserAvatar';
 import { cn } from '@/lib/utils';
 import { formatDisplayName } from '@/utils/format-display-name';
 
@@ -43,7 +43,12 @@ export function ExploreUserCard({
       <div className="pointer-events-none relative z-10 flex flex-col gap-3">
         <div className="flex items-start justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3">
-            <PostCardAvatar avatarUrl={avatarUrl} username={username} />
+            <UserAvatar
+              avatarUrl={avatarUrl}
+              className="h-10.5 w-10.5"
+              imageSize={42}
+              username={username}
+            />
 
             <div className="flex min-w-0 flex-col">
               <span className="truncate font-bold text-[#171b22] text-[14px]">

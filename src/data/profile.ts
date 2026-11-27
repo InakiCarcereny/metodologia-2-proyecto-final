@@ -1,16 +1,26 @@
 import {
   and,
   count,
+  countDistinct,
   desc,
   eq,
+  ilike,
   ne,
   notInArray,
+  or,
   type SQL,
   sql,
 } from 'drizzle-orm';
+import { alias } from 'drizzle-orm/pg-core';
 import { db } from '@/db';
 import { followers, posts, profiles, users } from '@/db/schema';
-import type { UserCardData, UserListItem, UserProfile } from '@/types/user';
+import type {
+  ExploreUserCardData,
+  ExploreUserSuggestion,
+  UserCardData,
+  UserListItem,
+  UserProfile,
+} from '@/types/user';
 
 async function countPostsByUser(idUser: string): Promise<number> {
   const [row] = await db
@@ -268,7 +278,7 @@ export async function getSuggestedUserCards(
 export async function getExploreUsersToFollow(
   currentUserId: string,
   limit = 4,
-) {
+): Promise<ExploreUserSuggestion[]> {
   try {
     return await db
       .select({
@@ -302,6 +312,66 @@ export async function getExploreUsersToFollow(
       )
       .orderBy(desc(count(followers.idFollower)), desc(users.createdAt))
       .limit(limit);
+  } catch {
+    return [];
+  }
+}
+
+export async function searchExploreUsers(
+  query: string,
+  currentUserId: string,
+  limit = 4,
+): Promise<ExploreUserCardData[]> {
+  const trimmedQuery = query.trim();
+  if (!trimmedQuery) return [];
+
+  try {
+    const searchPattern = `%${trimmedQuery}%`;
+    const following = alias(followers, 'following');
+
+    const rows = await db
+      .select({
+        avatarUrl: profiles.avatarUrl,
+        bio: profiles.bio,
+        followersCount: countDistinct(followers.idFollower).mapWith(Number),
+        followingId: following.idUser,
+        id: users.id,
+        username: users.username,
+      })
+      .from(users)
+      .leftJoin(profiles, eq(profiles.id, users.id))
+      .leftJoin(followers, eq(followers.idUser, users.id))
+      .leftJoin(
+        following,
+        and(
+          eq(following.idFollower, currentUserId),
+          eq(following.idUser, users.id),
+        ),
+      )
+      .where(
+        and(
+          ne(users.id, currentUserId),
+          or(
+            ilike(users.username, searchPattern),
+            ilike(profiles.bio, searchPattern),
+          ),
+        ),
+      )
+      .groupBy(
+        users.id,
+        users.username,
+        users.createdAt,
+        profiles.avatarUrl,
+        profiles.bio,
+        following.idUser,
+      )
+      .orderBy(desc(countDistinct(followers.idFollower)))
+      .limit(limit);
+
+    return rows.map(({ followingId, ...user }) => ({
+      ...user,
+      isFollowing: Boolean(followingId),
+    }));
   } catch {
     return [];
   }

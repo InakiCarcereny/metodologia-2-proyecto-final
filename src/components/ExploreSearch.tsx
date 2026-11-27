@@ -1,16 +1,14 @@
 'use client';
 
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import type { FormEvent, JSX } from 'react';
+import type { JSX, SubmitEvent } from 'react';
 import { useCallback, useEffect, useState, useTransition } from 'react';
 import { Button } from '@/components/ui/Button';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
+import { useQueryParam } from '@/hooks/useQueryParam';
 import { normalizeSearchQuery } from '@/utils/normalize-search-query';
 
 export function ExploreSearch(): JSX.Element {
-  const pathname = usePathname();
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const { searchParams, setParam } = useQueryParam();
 
   const initialQuery = searchParams.get('q') ?? '';
   const [query, setQuery] = useState(initialQuery);
@@ -20,23 +18,17 @@ export function ExploreSearch(): JSX.Element {
 
   const updateSearch = useCallback(
     (value: string): void => {
-      const params = new URLSearchParams(searchParams.toString());
       const normalizedValue = normalizeSearchQuery(value);
 
-      if (normalizedValue.length > 0) {
-        params.set('q', normalizedValue);
-      } else {
-        params.delete('q');
-      }
-
-      const nextQuery = params.toString();
-      const nextUrl = nextQuery ? `${pathname}?${nextQuery}` : pathname;
-
       startTransition(() => {
-        router.replace(nextUrl, { scroll: false });
+        setParam(
+          'q',
+          normalizedValue.length > 0 ? normalizedValue : null,
+          'replace',
+        );
       });
     },
-    [pathname, router, searchParams],
+    [setParam],
   );
 
   useEffect(() => {
@@ -48,10 +40,10 @@ export function ExploreSearch(): JSX.Element {
     updateSearch(normalizedQuery);
   }, [debouncedQuery, searchParams, updateSearch]);
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>): void {
+  const handleSubmit = (event: SubmitEvent<HTMLFormElement>): void => {
     event.preventDefault();
     updateSearch(query);
-  }
+  };
 
   return (
     <form className="flex items-center gap-3" onSubmit={handleSubmit}>

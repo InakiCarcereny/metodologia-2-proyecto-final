@@ -1,4 +1,12 @@
-import { and, count, desc, eq } from 'drizzle-orm';
+import {
+  and,
+  count,
+  countDistinct,
+  desc,
+  eq,
+  ilike,
+  inArray,
+} from 'drizzle-orm';
 import { db } from '@/db';
 import { postTags, tags, userTagFollows } from '@/db/schema';
 import type { Tag, TagCardData } from '@/types/tag';
@@ -34,6 +42,29 @@ export async function isFollowingTag(
     .limit(1);
 
   return Boolean(row);
+}
+
+export async function getFollowedTagIds(
+  userId: string,
+  tagIds: string[],
+): Promise<Set<string>> {
+  if (tagIds.length === 0) return new Set();
+
+  try {
+    const rows = await db
+      .select({ idTag: userTagFollows.idTag })
+      .from(userTagFollows)
+      .where(
+        and(
+          eq(userTagFollows.idUser, userId),
+          inArray(userTagFollows.idTag, tagIds),
+        ),
+      );
+
+    return new Set(rows.map((row) => row.idTag));
+  } catch {
+    return new Set();
+  }
 }
 
 export async function getTagByLabel(label: string): Promise<Tag | null> {
@@ -115,6 +146,36 @@ export async function getTrendingTags(limit = 5): Promise<TagCardData[]> {
       .limit(limit);
 
     return rows.map((row) => ({ ...row, postsCount: 0 }));
+  } catch {
+    return [];
+  }
+}
+
+export async function searchExploreTags(
+  query: string,
+  limit = 4,
+): Promise<TagCardData[]> {
+  const trimmedQuery = query.trim();
+  if (!trimmedQuery) return [];
+
+  try {
+    const searchPattern = `%${trimmedQuery}%`;
+
+    return await db
+      .select({
+        description: tags.description,
+        followersCount: countDistinct(userTagFollows.idUser).mapWith(Number),
+        id: tags.id,
+        label: tags.label,
+        postsCount: countDistinct(postTags.idPost).mapWith(Number),
+      })
+      .from(tags)
+      .leftJoin(userTagFollows, eq(userTagFollows.idTag, tags.id))
+      .leftJoin(postTags, eq(postTags.idTag, tags.id))
+      .where(ilike(tags.label, searchPattern))
+      .groupBy(tags.id, tags.label, tags.description)
+      .orderBy(desc(countDistinct(postTags.idPost)))
+      .limit(limit);
   } catch {
     return [];
   }

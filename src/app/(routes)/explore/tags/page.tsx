@@ -4,7 +4,7 @@ import type { JSX } from 'react';
 import { auth } from '@/auth';
 import { TagFollowButton } from '@/components/TagFollowButton';
 import { CardWrapper } from '@/components/ui/CardWrapper';
-import { searchExploreTags } from '@/data/explore';
+import { getFollowedTagIds, searchExploreTags } from '@/data/tag';
 
 interface ExploreTagsPageProps {
   searchParams: Promise<{ q?: string }>;
@@ -22,6 +22,10 @@ export default async function ExploreTags({
   const params = await searchParams;
   const query = params.q?.trim() ?? '';
   const tags = await searchExploreTags(query, 20);
+  const followedTagIds = await getFollowedTagIds(
+    session.user.id,
+    tags.map((tag) => tag.id),
+  );
 
   return (
     <div className="flex flex-col gap-5">
@@ -69,6 +73,7 @@ export default async function ExploreTags({
 
                 <TagFollowButton
                   className="min-w-24 px-3 py-1 text-[13px]"
+                  initialIsFollowing={followedTagIds.has(tag.id)}
                   tagId={tag.id}
                 />
               </li>
