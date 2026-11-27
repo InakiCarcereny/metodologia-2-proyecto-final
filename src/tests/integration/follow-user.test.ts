@@ -123,7 +123,7 @@ describe('followUser integration', () => {
   });
 
   it('rejects unauthenticated users', async () => {
-    vi.mocked(auth).mockResolvedValue(null);
+    vi.mocked(auth).mockResolvedValue(null as never);
 
     const result = await followUser(targetUserId);
 
