@@ -6,7 +6,23 @@ const nextConfig: NextConfig = {
       bodySizeLimit: '5mb',
     },
   },
-  output: 'standalone',
+  images: {
+    remotePatterns: [
+      {
+        hostname: 'avatars.githubusercontent.com',
+        protocol: 'https',
+      },
+      {
+        hostname: 'res.cloudinary.com',
+        protocol: 'https',
+      },
+      {
+        hostname: 'api.dicebear.com',
+        protocol: 'https',
+      },
+    ],
+  },
+  output: process.env.VERCEL ? undefined : 'standalone',
   reactCompiler: true,
 };
 
